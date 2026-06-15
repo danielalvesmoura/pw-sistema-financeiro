@@ -1,0 +1,20 @@
+.logo-container {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.logo-container .icon {
+    background-color: #003345;
+    border-radius: 1rem;
+    padding: .8rem;
+    height: 3rem;
+    width: 3rem;
+    color: white;
+}
+
+.logo-container span {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #003345;
+}

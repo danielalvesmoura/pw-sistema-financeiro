@@ -1,0 +1,18 @@
+.login-page .error-conteiner .icon {
+    font-size: 2rem;
+    color: #93000A;
+}
+
+.login-page .error-conteiner p {
+    color: #93000A;
+    font-size: 1.3rem;
+}
+
+.login-page .error-conteiner {
+    background-color: #FFDAD6;
+    padding: 1rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border-radius: 1rem;
+}
