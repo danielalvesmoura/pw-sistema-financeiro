@@ -16,38 +16,31 @@ const Login = () => {
 
     const [emailOrPasswordError, setEmailOrPasswordError] = useState(false);
 
-    const validateEmail = (value) => {
+    const [emailFormatError, setEmailFormatError] = useState(false);
+    const [passwordFormatError, setPasswordFormatError] = useState(false);
+
+    const validateEmailFormat = (value) => {
         if (!value) return false;
 
-        // Validação para e-mail (contém '@')
-        const isEmailFormat = value.includes("@");
-        
-        if (isEmailFormat) {
-            // Validação de e-mail um pouco mais robusta
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(value);
-        } else {
-            // Nome de usuário não pode ter espaços
-            return !value.includes(" ");
-        }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        return emailRegex.test(value);
     };
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        console.log("asdf");
-
-        if (validateEmail(emailInputValue)) {
-
+        if (validateEmailFormat(emailInputValue)) {
+            setEmailFormatError(false);
         } else {
-            setEmailOrPasswordError(true);
+            setEmailFormatError(true);
         }
     }
 
     return (
         <div className="login-page">
             <header>
-                <Logo/>
+                <Logo/> 
                 <h1>Bem-vindo de volta</h1>
                 <p>Gerencie suas finanças colaborativas em um só lugar.</p>
             </header>
@@ -63,11 +56,14 @@ const Login = () => {
                         icon={<MdOutlineEmail />}
                         onChange={(e) => setEmailInputValue(e.target.value)}
                     />
+                    {emailFormatError && <span className="error-message">Email inválido</span>}
+
                     <PasswordInput
                         label="SENHA"
                         placeholder="••••••••••"
                         onChange={(e) => setPasswordInputValue(e.target.value)}
                     />
+                    {passwordFormatError && <span className="error-message">Senha inválida</span>}
 
                     <button type="submit" className="form-button" disabled={emailInputValue === "" || passwordInputValue === ""}>
                         Entrar

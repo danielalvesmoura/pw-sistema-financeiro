@@ -6,7 +6,7 @@ const InputError = () => {
     return (
         <div className="error-conteiner">
             <MdErrorOutline className="icon"/>
-            <p>E-mail ou senha incorretos</p>
+            <p>E-mail ou senha incorretos ou conta inexistente</p>
         </div>
     )
 }

@@ -57,3 +57,7 @@
     background-color: #2a424b;
     transform: translateY(0px);
 }
+
+.login-page .error-message {
+    color: red;
+}
