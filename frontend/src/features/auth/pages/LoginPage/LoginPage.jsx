@@ -7,6 +7,8 @@ import PasswordInput from "../../../../shared/components/PasswordInput/PasswordI
 import InputError from "../../../../shared/components/InputError/InputError";
 import Teste from "../../../../shared/components/Teste/Teste";
 
+import { searchAccount } from "../../mockAuth";
+
 import "./LoginPage.css";
 
 const Login = () => {
@@ -34,7 +36,17 @@ const Login = () => {
             setEmailFormatError(false);
         } else {
             setEmailFormatError(true);
+            return;
         }
+
+        if(searchAccount(emailInputValue,passwordInputValue)) {
+            setEmailOrPasswordError(false);
+        } else {
+            setEmailOrPasswordError(true);
+        }
+
+        console.log(searchAccount(emailInputValue, passwordInputValue));
+        
     }
 
     return (

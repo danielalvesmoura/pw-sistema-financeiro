@@ -1,20 +1,10 @@
-const DEFAULT_USERS = {
-  adm: {
+const DEFAULT_USERS = [
+  {
     id: 1,
     email: "admin@wallet.com",
     password: "admin"
   },
-};
-
-const searchAccount = (email, password) => {
-  if (email === DEFAULT_USERS.adm.email && password === DEFAULT_USERS.adm.password) {
-    login(email,senha);
-  }
-
-  const registeredAccounts = localStorage.getItem("registeredAccounts") || [];
-
-  
-}
+];
 
 const login = (email, password) => {
   const session = {
@@ -23,6 +13,36 @@ const login = (email, password) => {
   }
 
   localStorage.setItem("session", JSON.stringify(session));
-
-  return true;
 }
+
+export const searchAccount = (email, password) => {
+
+  let existentAccount = false;
+
+  DEFAULT_USERS.forEach(account => {
+    if (email === account.email && password === account.password) {
+      login(email, password);
+      existentAccount = true;
+    }
+  })
+
+  const registeredAccounts = localStorage.getItem("registeredAccounts") || [];
+
+  if(registeredAccounts.length === 0) return false;
+
+  registeredAccounts.forEach(account => {
+    if(account.email === email && account.password === password) {
+      login(email, password);
+      return true;
+    } else {
+      return false;
+    }
+  })
+
+  if(existentAccount) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
