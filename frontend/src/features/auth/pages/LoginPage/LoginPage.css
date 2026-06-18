@@ -23,7 +23,7 @@
     text-align: start;
 }
 
-.login-page p {
+.login-page header p {
     color: #6a777e;
     font-size: 1.5rem;
     text-align: start;
@@ -60,4 +60,30 @@
 
 .login-page .error-message {
     color: red;
+}
+
+.login-page .link-recover {
+    display: inline-block;
+    color: var(--primary-color);
+    margin-top: 1rem;
+}
+
+.login-page form p {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    justify-content: center;
+}
+
+.login-page .link-register {
+    margin-right: 1rem;
+    display: inline-block;
+    color: var(--primary-color);
+    font-weight: 900;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+.login-page .link-register:hover {
+    transform: scale(1.1);
 }

@@ -26,6 +26,8 @@ export const searchAccount = (email, password) => {
     }
   })
 
+  if(existentAccount) return true;
+
   const registeredAccounts = localStorage.getItem("registeredAccounts") || [];
 
   if(registeredAccounts.length === 0) return false;
@@ -33,9 +35,7 @@ export const searchAccount = (email, password) => {
   registeredAccounts.forEach(account => {
     if(account.email === email && account.password === password) {
       login(email, password);
-      return true;
-    } else {
-      return false;
+      existentAccount = true;
     }
   })
 
