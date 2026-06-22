@@ -1,0 +1,13 @@
+.arrowback-icon {
+    width: 3rem;
+    height: 3rem;
+    color: #003345;
+    padding: .4rem;
+    border-radius: 3rem;
+    transition: .2s;
+}
+
+.arrowback-icon:hover {
+    background-color: rgba(0, 0, 0, 0.103);
+    cursor: pointer;
+}

@@ -1,7 +1,11 @@
-import {useState} from "react";
+import UsuarioService from "../../../../services/UsuarioService";
+
+import { useState } from "react";
 import { MdOutlineEmail } from "react-icons/md";
 
+
 import Logo from "../../../../shared/components/Logo/Logo";
+import ArrowBack from "../../../../shared/components/ArrowBack/ArrowBack";
 import Input from "../../../../shared/components/Input/Input";
 import PasswordInput from "../../../../shared/components/PasswordInput/PasswordInput";
 import { LoadingOverlay } from "../../../../shared/components/LoadingOverlay/LoadingOverlay";
@@ -12,12 +16,15 @@ import { Link } from "react-router-dom";
 
 import { searchAccount } from "../../mockAuth";
 
-import "./LoginPage.css";
+import "./RegisterPage.css";
 
-const Login = () => {
+const usuarioService = new UsuarioService();
+
+const RegisterPage = () => {
 
     const [emailInputValue, setEmailInputValue] = useState("");
     const [passwordInputValue, setPasswordInputValue] = useState("");
+    const [confirmPasswordInputValue, setConfirmPasswordInputValue] = useState("");
 
     const [emailOrPasswordError, setEmailOrPasswordError] = useState(false);
 
@@ -34,7 +41,15 @@ const Login = () => {
         return emailRegex.test(value);
     };
 
-    
+    // const register = () => {
+    //     try {
+    //         UsuarioService.inserir(dados);
+    //     } catch (erroCadstro) {
+    //         const mensagem = erroCadstro?.response?.data?.mensagem || "Não foi possível realizar o cadastro.";
+    //     }
+    // }
+
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -49,7 +64,7 @@ const Login = () => {
                 return;
             }
 
-            if(searchAccount(emailInputValue,passwordInputValue)) {
+            if (searchAccount(emailInputValue, passwordInputValue)) {
                 setEmailOrPasswordError(false);
             } else {
                 setEmailOrPasswordError(true);
@@ -58,23 +73,28 @@ const Login = () => {
             setLoading(false);
 
         }, 1000)
-        
+
     }
 
     return (
         <>
             {loading && <LoadingOverlay />}
 
-            <div className="login-page">
-                <header>
-                    <Logo/> 
-                    <h1>Bem-vindo de volta</h1>
-                    <p>Gerencie suas finanças colaborativas em um só lugar.</p>
-                </header>
+            <div className="register-page">
+                
                 <main>
-                    
+                    <header>
+                        <div className="first-line">
+                            <ArrowBack url="/" />
+                            <Logo />
+                        </div>
 
-                    {emailOrPasswordError && <InputError/>}
+                        <h1>Cadastre-se</h1>
+                        <p>Preencha os campos para criar uma nova conta.</p>
+                    </header>
+
+
+                    {emailOrPasswordError && <InputError />}
 
                     <form onSubmit={handleSubmit}>
                         <Input
@@ -92,24 +112,27 @@ const Login = () => {
                         />
                         {passwordFormatError && <span className="error-message">Senha inválida</span>}
 
-                        <Link to={"/recuperar-senha"} className="link-recover">
-                            Esqueceu sua senha?
-                        </Link>
+                        <PasswordInput
+                            label="CONFIRMAR SENHA"
+                            placeholder="••••••••••"
+                            onChange={(e) => setPasswordInputValue(e.target.value)}
+                        />
+                        {passwordFormatError && <span className="error-message">Senha inválida</span>}
 
                         <button type="submit" className="form-button" disabled={emailInputValue === "" || passwordInputValue === ""}>
-                            Entrar 
+                            Criar conta
                         </button>
 
                         <p>
-                            Ainda não tem uma conta?
-                            <Link to={"/cadastrar-conta"} className="link-register">Cadastre-se</Link>
+                            Já tem uma conta?
+                            <Link to={"/cadastrar-conta"} className="link-register">Entrar</Link>
                         </p>
                     </form>
                 </main>
             </div>
         </>
-        
-    )
-} 
 
-export default Login;
+    )
+}
+
+export default RegisterPage;
