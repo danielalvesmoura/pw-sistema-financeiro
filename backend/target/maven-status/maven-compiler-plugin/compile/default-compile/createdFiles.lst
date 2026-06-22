@@ -1,0 +1,8 @@
+com\ifpr\backend\exception\GlobalExceptionHandler.class
+com\ifpr\backend\exception\ErroResposta.class
+com\ifpr\backend\repository\UsuarioRepository.class
+com\ifpr\backend\controller\UsuarioController.class
+com\ifpr\backend\service\UsuarioService.class
+com\ifpr\backend\BackendApplication.class
+com\ifpr\backend\model\Usuario.class
+com\ifpr\backend\model\Perfil.class
