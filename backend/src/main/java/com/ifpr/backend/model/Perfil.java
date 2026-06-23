@@ -1,6 +1,6 @@
 package com.ifpr.backend.model;
 
-import org.hibernate.validator.constraints.UUID;
+import java.util.UUID;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
