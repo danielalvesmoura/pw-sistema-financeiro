@@ -34,8 +34,11 @@ public class UsuarioService {
 
     public Usuario alterar(Usuario usuario) {
         Usuario usuarioDB = buscarPorId(usuario.getId());
+
         usuarioDB.setNome(usuario.getNome());
         usuarioDB.setEmail(usuario.getEmail());
+        usuarioDB.setSenha(usuario.getSenha());
+
         return repository.save(usuarioDB);
     }
 }   

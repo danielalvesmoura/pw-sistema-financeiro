@@ -1,7 +1,5 @@
 package com.ifpr.backend.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -21,7 +19,6 @@ public class Usuario {
     private String nome;
     @Email(message = "Insira um email válido")
     private String email;
-    @JsonIgnore
     private String senha;
 
 }
