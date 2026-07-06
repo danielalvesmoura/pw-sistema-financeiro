@@ -87,3 +87,15 @@
 .login-page .link-register:hover {
     transform: scale(1.1);
 }
+
+@media (max-width: 1200px) {
+    .login-page main {
+        width: 60%;
+    }
+}
+
+@media (max-width: 490px) {
+    .login-page main {
+        width: 90%;
+    }
+}

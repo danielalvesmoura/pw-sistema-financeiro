@@ -66,13 +66,13 @@ const Login = () => {
             {loading && <LoadingOverlay />}
 
             <div className="login-page">
-                <header>
-                    <Logo/> 
-                    <h1>Bem-vindo de volta</h1>
-                    <p>Gerencie suas finanças colaborativas em um só lugar.</p>
-                </header>
+                
                 <main>
-                    
+                    <header>
+                        <Logo />
+                        <h1>Bem-vindo de volta</h1>
+                        <p>Gerencie suas finanças colaborativas em um só lugar.</p>
+                    </header>
 
                     {emailOrPasswordError && <InputError/>}
 
