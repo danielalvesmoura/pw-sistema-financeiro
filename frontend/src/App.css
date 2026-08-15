@@ -1,38 +1,149 @@
 .App {
-  text-align: center;
-}
-
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
   min-height: 100vh;
+}
+
+.simple-page {
+  min-height: 100vh;
+  background-color: var(--page-color);
+}
+
+.page-title {
+  margin: 0 0 0.5rem;
+  color: var(--text-color);
+  font-size: 2.4rem;
+}
+
+.page-subtitle {
+  margin: 0 0 2rem;
+  color: var(--muted-color);
+}
+
+.simple-card {
+  background-color: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  padding: 1.8rem;
+}
+
+.simple-form {
+  display: grid;
+  gap: 1.2rem;
+}
+
+.simple-form label {
+  display: grid;
+  gap: 0.6rem;
+  text-align: left;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.simple-form input,
+.simple-form select,
+.simple-form textarea,
+.simple-select {
+  width: 100%;
+  border: 1px solid var(--border-color);
+  background-color: var(--field-color);
+  color: var(--text-color);
+  border-radius: 0.6rem;
+  padding: 1rem 1.2rem;
+  outline: none;
+}
+
+.simple-form textarea {
+  min-height: 8rem;
+  resize: vertical;
+}
+
+.simple-button {
+  border: none;
+  border-radius: 0.8rem;
+  padding: 1rem 1.4rem;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.simple-button.secondary {
+  background-color: #6a777e;
+}
+
+.simple-button.danger {
+  background-color: var(--danger-color);
+}
+
+.simple-button:disabled {
+  background-color: #879196;
+  cursor: not-allowed;
+}
+
+.message {
+  margin: 1rem 0;
+  padding: 1rem 1.2rem;
+  border-radius: 0.7rem;
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+}
+
+.message.error {
+  color: var(--danger-color);
+  border-color: #fecaca;
+  background-color: #fee2e2;
+}
+
+.message.success {
+  color: var(--success-color);
+  border-color: #bbf7d0;
+  background-color: #dcfce7;
+}
+
+.simple-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.simple-table th,
+.simple-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+}
+
+.simple-table th {
+  background-color: var(--primary-light);
+}
+
+.inline-actions {
   display: flex;
-  flex-direction: column;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.two-columns {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.8fr) minmax(0, 1.6fr);
+  gap: 2rem;
+}
+
+@media (max-width: 800px) {
+  .two-columns {
+    grid-template-columns: 1fr;
+  }
+
+  .simple-table {
+    font-size: 1.3rem;
+  }
+}
+
+.checkbox-line {
+  display: flex !important;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  gap: 0.8rem !important;
+  font-weight: 500 !important;
 }
 
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.checkbox-line input {
+  width: auto !important;
 }
