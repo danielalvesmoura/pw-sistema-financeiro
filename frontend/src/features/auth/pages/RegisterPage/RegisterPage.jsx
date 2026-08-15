@@ -141,7 +141,7 @@ const RegisterPage = () => {
             }, 1500);
         } catch (erroCadastro) {
             const mensagem =
-                erroCadastro?.response?.data?.mensagem ||
+                erroCadastro?.response?.data?.message ||
                 "Não foi possível realizar o cadastro.";
 
             setErrorMessage(mensagem);
