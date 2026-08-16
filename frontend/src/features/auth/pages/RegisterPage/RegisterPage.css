@@ -1,28 +1,22 @@
 .register-page {
     min-height: 100vh;
-
     display: flex;
     flex-direction: column;
-
     align-items: center;
     justify-content: center;
-
     padding: 2rem 0;
 }
 
 .register-page .first-line {
     display: flex;
     align-items: center;
-
     gap: 1rem;
 }
 
 .register-page header {
     display: flex;
     flex-direction: column;
-
     gap: 0.5rem;
-
     margin-bottom: 1.5rem;
 }
 
@@ -32,149 +26,103 @@
 
 .register-page h1 {
     color: #40484c;
-
     font-size: 1.9rem;
-
     text-align: start;
-
     margin: 0;
 }
 
 .register-page header p {
     color: #6a777e;
-
     font-size: 1.3rem;
-
     text-align: start;
-
     margin: 0;
 }
 
 .register-page form {
     margin-top: 1rem;
-
     display: flex;
     flex-direction: column;
-
     gap: 0.3rem;
 }
 
 .register-page button {
     background-color: #003345;
-
     border: none;
     border-radius: 1rem;
-
     padding: 1rem 0;
-
     width: 100%;
-
     margin-top: 2rem;
-
     color: white;
-
     font-family: "Inter", sans-serif;
-
     font-size: 1.5rem;
     font-weight: 600;
-
     transition: 0.2s;
 }
 
 .register-page button:hover {
     cursor: pointer;
-
     transform: translateY(-4px);
 }
 
 .register-page button:disabled {
     cursor: not-allowed;
-
     background-color: #2a424b;
-
     transform: translateY(0);
 }
 
 .register-page .error-message {
     display: block;
-
     color: #dc2626;
-
     font-size: 1.1rem;
-
     margin-top: -0.3rem;
     margin-bottom: 0.6rem;
-
     animation: fadeError .2s ease;
 }
 
 .register-page .alert-message {
     width: 100%;
-
     padding: 0.9rem 1rem;
-
     border-radius: 0.8rem;
-
     margin-bottom: 1.2rem;
-
     font-size: 1.25rem;
-
     font-weight: 500;
-
     animation: fadeMessage .25s ease;
 }
 
 .register-page .alert-message.error {
     background-color: #fee2e2;
-
     color: #b91c1c;
-
     border: 1px solid #fecaca;
 }
 
 .register-page .alert-message.success {
     background-color: #dcfce7;
-
     color: #15803d;
-
     border: 1px solid #bbf7d0;
 }
 
 .register-page .link-recover {
     display: inline-block;
-
     color: var(--primary-color);
-
     margin-top: 0.5rem;
 }
 
 .register-page form p {
     display: flex;
-
     gap: 0.6rem;
-
     margin-top: 1rem;
-
     justify-content: center;
-
     flex-wrap: wrap;
-
     font-size: 1.3rem;
 }
 
 .register-page .link-register {
     display: inline-block;
-
     color: var(--primary-color);
-
     font-weight: 900;
-
     text-decoration: none;
-
     transition: 0.2s;
-
     white-space: nowrap;
-
     margin-right: 0;
 }
 
@@ -188,61 +136,45 @@
 
 .register-page .password-strength {
     margin-top: 0.3rem;
-
     margin-bottom: 0.8rem;
 }
 
 .register-page .password-strength span {
     display: block;
-
     font-size: 1.1rem;
-
     color: #6a777e;
 }
 
 .register-page .strength-bar {
     width: 100%;
-
     height: 0.6rem;
-
     background: #e5e7eb;
-
     border-radius: 999px;
-
     overflow: hidden;
-
     position: relative;
-
     margin-bottom: 0.4rem;
 }
 
 .register-page .strength-bar::after {
     content: "";
-
     display: block;
-
     height: 100%;
-
     border-radius: inherit;
-
     transition: .25s ease;
 }
 
 .register-page .strength-bar.weak::after {
     width: 33%;
-
     background: #ef4444;
 }
 
 .register-page .strength-bar.medium::after {
     width: 66%;
-
     background: #f59e0b;
 }
 
 .register-page .strength-bar.strong::after {
     width: 100%;
-
     background: #22c55e;
 }
 
@@ -297,8 +229,6 @@
 
     .register-page button {
         font-size: 1.4rem;
-
         padding: 0.9rem 0;
     }
 }
-
