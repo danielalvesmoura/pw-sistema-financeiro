@@ -1,36 +1,13 @@
-import BaseService from './BaseService';
+import api from "../configs/axiosConfig";
 
-class UsuarioService extends BaseService {
-    constructor() {
-        super('/usuario');
-    }
-
+class UsuarioService {
     async cadastrar(usuario) {
-        const resposta = await this.api.post(this.endPoint, usuario);
-        return resposta.data;
-    }
-
-    async buscarPorId(id) {
-        const resposta = await this.api.get(`${this.endPoint}/${id}`);
-        return resposta.data;
-    }
-
-    async atualizar(id, usuario) {
-        const resposta = await this.api.put(
-            `${this.endPoint}/${id}`,
-            usuario
-        );
-
-        return resposta.data;
-    }
-
-    async remover(id) {
-        const resposta = await this.api.delete(
-            `${this.endPoint}/${id}`
-        );
-
-        return resposta.data;
+        const { data } = await api.post("/auth/register", {
+            name: usuario.nome,
+            email: usuario.email,
+            password: usuario.senha,
+        });
+        return data;
     }
 }
-
 export default UsuarioService;
