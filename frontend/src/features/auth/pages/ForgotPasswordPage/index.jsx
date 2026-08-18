@@ -16,33 +16,83 @@ export default function ForgotPasswordPage() {
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
 
-    const submit = async (e) => {
-        e.preventDefault();
-        if (!isValidEmail(email)) return setError("Informe um e-mail válido.");
-        setLoading(true); setError(""); setToken("");
+    const submit = async (event) => {
+        event.preventDefault();
+
+        if (!isValidEmail(email)) {
+            setError("Informe um e-mail válido.");
+            return;
+        }
+
+        setLoading(true);
+        setError("");
+        setToken("");
+
         try {
             const data = await authService.forgotPassword(email);
+
             setMessage(data.message);
             setToken(data.debugToken || "");
         } catch (err) {
-            setError(err?.response?.data?.message || "Não foi possível solicitar a recuperação.");
-        } finally { setLoading(false); }
+            setError(
+                err?.response?.data?.message ||
+                    "Não foi possível solicitar a recuperação.",
+            );
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
         <>
             {loading && <LoadingOverlay />}
+
             <div className="forgot-page auth-simple-page">
                 <main>
-                    <header><div className="auth-first-line"><ArrowBack url="/login" /><Logo /></div><h1>Recuperar senha</h1><p>Informe seu e-mail.</p></header>
+                    <header>
+                        <div className="auth-first-line">
+                            <ArrowBack url="/login" />
+                            <Logo />
+                        </div>
+
+                        <h1>Recuperar senha</h1>
+                        <p>Informe seu e-mail.</p>
+                    </header>
+
                     {error && <div className="message error">{error}</div>}
-                    {message && <div className="message success">{message}</div>}
-                    {token && <div className="message"><strong>Teste local:</strong> <Link to={`/redefinir-senha/${token}`}>abrir redefinição de senha</Link></div>}
+                    {message && (
+                        <div className="message success">{message}</div>
+                    )}
+
+                    {token && (
+                        <div className="message">
+                            <strong>Teste local:</strong>{" "}
+                            <Link to={`/redefinir-senha/${token}`}>
+                                abrir redefinição de senha
+                            </Link>
+                        </div>
+                    )}
+
                     <form onSubmit={submit}>
-                        <Input label="E-MAIL" icon={<MdOutlineEmail />} placeholder="exemplo@email.com" value={email} onChange={(e) => setEmail(e.target.value)} />
-                        <button type="submit" disabled={!email || loading}>Solicitar recuperação</button>
+                        <Input
+                            label="E-MAIL"
+                            icon={<MdOutlineEmail />}
+                            placeholder="exemplo@email.com"
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                        />
+
+                        <button
+                            type="submit"
+                            disabled={!email || loading}
+                        >
+                            Solicitar recuperação
+                        </button>
                     </form>
-                    <Link className="auth-bottom-link" to="/login">Voltar ao login</Link>
+
+                    <Link className="auth-bottom-link" to="/login">
+                        Voltar ao login
+                    </Link>
                 </main>
             </div>
         </>

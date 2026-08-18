@@ -1,0 +1,102 @@
+.wallets-top-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.wallets-top-grid h2,
+.wallet-details h2 {
+    margin-top: 0;
+}
+
+.wallet-list {
+    display: grid;
+    gap: .8rem;
+}
+
+.wallet-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 1rem;
+    border: 1px solid #d7dbdd;
+    background-color: #ffffff;
+    border-radius: .7rem;
+    cursor: pointer;
+    color: #40484c;
+}
+
+.wallet-item.selected {
+    background-color: #e7eef0;
+    border-color: #003345;
+}
+
+.wallet-item span {
+    color: #6a777e;
+    font-size: 1.2rem;
+}
+
+.wallet-details {
+    margin-top: 1.5rem;
+}
+
+.wallet-detail-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+}
+
+.wallet-detail-header p {
+    color: #6a777e;
+}
+
+.wallet-edit-form {
+    max-width: 600px;
+    margin: 2rem 0;
+}
+
+.member-form {
+    display: grid;
+    grid-template-columns: 1fr 180px auto;
+    gap: .8rem;
+    margin: 1rem 0 2rem;
+}
+
+.member-form input,
+.member-form select,
+.members-table-wrap select {
+    border: 1px solid #d7dbdd;
+    background-color: #e1e3e4;
+    border-radius: .6rem;
+    padding: .8rem;
+}
+
+.members-table-wrap {
+    overflow-x: auto;
+}
+
+@media (max-width: 800px) {
+    .wallets-top-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .member-form {
+        grid-template-columns: 1fr;
+    }
+
+    .wallet-detail-header {
+        flex-direction: column;
+    }
+}
+
+.checkbox-line {
+    display: flex !important;
+    grid-template-columns: none !important;
+    align-items: center;
+    gap: .8rem !important;
+    font-weight: 500 !important;
+}
+
+.checkbox-line input {
+    width: auto !important;
+}

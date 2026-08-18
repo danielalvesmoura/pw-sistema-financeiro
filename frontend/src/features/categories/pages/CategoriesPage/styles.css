@@ -1,0 +1,44 @@
+.categories-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 2rem;
+}
+
+.category-wallet-select {
+    max-width: 300px;
+    background-color: #ffffff;
+}
+
+.category-list-card {
+    overflow-x: auto;
+}
+
+.category-list-card h2,
+.two-columns h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.small-action {
+    border: 1px solid #d7dbdd;
+    background-color: #ffffff;
+    color: #003345;
+    border-radius: .6rem;
+    padding: .6rem .8rem;
+    cursor: pointer;
+}
+
+.danger-link {
+    color: #b91c1c;
+}
+
+@media (max-width: 900px) {
+    .categories-header {
+        flex-direction: column;
+    }
+
+    .category-wallet-select {
+        max-width: none;
+    }
+}

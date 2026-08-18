@@ -1,0 +1,73 @@
+.transactions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    gap: 2rem;
+}
+
+.transactions-header-actions {
+    display: grid;
+    gap: .8rem;
+    min-width: 300px;
+}
+
+.transaction-wallet-select {
+    width: 100%;
+    background-color: #ffffff;
+}
+
+.export-controls {
+    display: grid;
+    grid-template-columns: 1fr 90px auto;
+    gap: .6rem;
+}
+
+.export-controls .simple-select {
+    min-width: 0;
+}
+
+.export-button {
+    white-space: nowrap;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+.transactions-grid {
+    grid-template-columns: minmax(280px, .8fr) minmax(0, 1.8fr);
+}
+
+.transactions-grid h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.transactions-list-card {
+    overflow-x: auto;
+}
+
+.transaction-category {
+    display: block;
+    color: #6a777e;
+    margin-top: .3rem;
+}
+
+@media (max-width: 900px) {
+    .transactions-header {
+        flex-direction: column;
+    }
+
+    .transactions-header-actions {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .transactions-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 620px) {
+    .export-controls {
+        grid-template-columns: 1fr;
+    }
+}

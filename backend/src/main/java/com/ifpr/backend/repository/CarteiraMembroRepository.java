@@ -1,0 +1,14 @@
+package com.ifpr.backend.repository;
+
+import com.ifpr.backend.model.CarteiraMembro;
+import java.util.List;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface CarteiraMembroRepository extends JpaRepository<CarteiraMembro, Long> {
+    List<CarteiraMembro> findByUsuarioIdOrderByEntradoEmAsc(Long usuarioId);
+    List<CarteiraMembro> findByCarteiraIdOrderByEntradoEmAsc(Long carteiraId);
+    Optional<CarteiraMembro> findByCarteiraIdAndUsuarioId(Long carteiraId, Long usuarioId);
+    boolean existsByCarteiraIdAndUsuarioId(Long carteiraId, Long usuarioId);
+    void deleteByCarteiraId(Long carteiraId);
+}

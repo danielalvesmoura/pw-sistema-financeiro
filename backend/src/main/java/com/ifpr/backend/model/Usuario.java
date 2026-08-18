@@ -1,24 +1,69 @@
 package com.ifpr.backend.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import lombok.Data;
-import jakarta.validation.constraints.*;
+import jakarta.persistence.*;
+import lombok.Getter;
+import lombok.Setter;
 
+import java.time.LocalDateTime;
+
+@Getter
+@Setter
 @Entity
-@Data
+@Table(name = "usuarios", uniqueConstraints = @UniqueConstraint(columnNames = "email"))
 public class Usuario {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @NotBlank(message = "Nome Obrigatório")
-    @Size(min = 10, message = "Insira o nome completo")
-    private String nome;
-    @Email(message = "Insira um email válido")
-    private String email;
-    private String senha;
 
+    @Column(nullable = false, length = 100)
+    private String nome;
+
+    @Column(nullable = false, unique = true, length = 180)
+    private String email;
+
+    @Column(nullable = false, length = 100)
+    private String senhaCriptografada;
+
+    // Atributos extras sugeridos no enunciado.
+    @Column(length = 30)
+    private String telefone;
+
+    @Column(length = 500)
+    private String fotoUrl;
+
+    // Preferência simples do usuário.
+    @Column(length = 3)
+    private String moedaPadrao = "BRL";
+
+    private Boolean ativo = true;
+
+    private LocalDateTime ultimoAcessoEm;
+
+    @Column(nullable = false)
+    private LocalDateTime criadoEm;
+
+    @Column(nullable = false)
+    private LocalDateTime atualizadoEm;
+
+    @PrePersist
+    void prePersist() {
+        criadoEm = LocalDateTime.now();
+        atualizadoEm = criadoEm;
+        if (moedaPadrao == null || moedaPadrao.isBlank()) moedaPadrao = "BRL";
+        if (ativo == null) ativo = true;
+    }
+
+    @PreUpdate
+    void preUpdate() {
+        atualizadoEm = LocalDateTime.now();
+    }
+
+    // Mantidos apenas porque possuem regra além de um getter simples.
+    public String getMoedaPadrao() {
+        return moedaPadrao == null || moedaPadrao.isBlank() ? "BRL" : moedaPadrao;
+    }
+
+    public boolean isAtivo() {
+        return ativo == null || ativo;
+    }
 }

@@ -1,0 +1,64 @@
+.auth-simple-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.auth-simple-page main {
+    width: 30%;
+    min-width: 320px;
+}
+
+.auth-simple-page header {
+    display: grid;
+    gap: .7rem;
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.auth-first-line {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.auth-simple-page h1 {
+    margin: 1rem 0 0;
+    color: #40484c;
+}
+
+.auth-simple-page p {
+    margin: 0;
+    color: #6a777e;
+}
+
+.auth-simple-page form button {
+    width: 100%;
+    margin-top: 2rem;
+    border: none;
+    border-radius: 1rem;
+    padding: 1.2rem;
+    background-color: #003345;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.auth-simple-page form button:disabled {
+    background-color: #2a424b;
+    cursor: not-allowed;
+}
+
+.auth-bottom-link {
+    display: inline-block;
+    margin-top: 2rem;
+}
+
+@media (max-width: 800px) {
+    .auth-simple-page main {
+        width: 90%;
+        min-width: 0;
+    }
+}

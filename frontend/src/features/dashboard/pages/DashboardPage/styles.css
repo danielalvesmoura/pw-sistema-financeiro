@@ -1,0 +1,99 @@
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    align-items: start;
+}
+
+.wallet-select {
+    max-width: 280px;
+    background-color: #ffffff;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.metric {
+    display: grid;
+    gap: .8rem;
+}
+
+.metric span {
+    color: #6a777e;
+}
+
+.metric strong {
+    font-size: 2.4rem;
+}
+
+.metric.income strong,
+.value-income {
+    color: #15803d;
+}
+
+.metric.expense strong,
+.value-expense {
+    color: #b91c1c;
+}
+
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 1.5rem;
+}
+
+.chart-card h2,
+.recent-card h2 {
+    margin-top: 0;
+    font-size: 1.8rem;
+}
+
+.chart-box {
+    width: 100%;
+    height: 300px;
+}
+
+.recent-list {
+    display: grid;
+}
+
+.recent-item {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #d7dbdd;
+}
+
+.recent-item div {
+    display: grid;
+    gap: .3rem;
+    text-align: left;
+}
+
+.recent-item small {
+    color: #6a777e;
+}
+
+.empty-wallet {
+    max-width: 600px;
+}
+
+@media (max-width: 900px) {
+    .metrics-grid,
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .dashboard-header {
+        flex-direction: column;
+    }
+
+    .wallet-select {
+        max-width: none;
+    }
+}
