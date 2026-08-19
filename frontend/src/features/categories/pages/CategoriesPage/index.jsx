@@ -142,7 +142,7 @@ export default function CategoriesPage() {
                 <div>
                     <h1 className="page-title">Categorias</h1>
                     <p className="page-subtitle">
-                        Categorias compartilhadas da carteira selecionada.
+                        Suas categorias na carteira selecionada.
                     </p>
                 </div>
 
@@ -182,7 +182,7 @@ export default function CategoriesPage() {
                         {!canEdit && (
                             <div className="message">
                                 Seu papel é VIEWER. Você pode apenas visualizar
-                                as categorias.
+                                suas categorias.
                             </div>
                         )}
 
@@ -303,7 +303,7 @@ export default function CategoriesPage() {
                     </div>
 
                     <div className="simple-card category-list-card">
-                        <h2>Categorias da carteira</h2>
+                        <h2>Minhas categorias</h2>
 
                         {items.length === 0 ? (
                             <p>Nenhuma categoria cadastrada.</p>

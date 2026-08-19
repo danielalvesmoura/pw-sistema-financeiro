@@ -7,6 +7,7 @@ import com.ifpr.backend.exception.ResourceNotFoundException;
 import com.ifpr.backend.model.Carteira;
 import com.ifpr.backend.model.Categoria;
 import com.ifpr.backend.model.TipoTransacao;
+import com.ifpr.backend.model.Usuario;
 import com.ifpr.backend.repository.CarteiraRepository;
 import com.ifpr.backend.repository.CategoriaRepository;
 import com.ifpr.backend.repository.TransacaoRepository;
@@ -39,10 +40,13 @@ public class CategoryService {
     @Transactional
     public List<CategoryResponse> list(Long walletId, TipoTransacao type) {
         auth.requireMember(walletId);
-        migrateLegacyCategoriesIfNeeded(walletId);
+        Usuario currentUser = currentUserService.get();
+        migrateLegacyCategoriesIfNeeded(walletId, currentUser);
         List<Categoria> categorias = type == null
-                ? categoriaRepository.findByCarteiraIdOrderByOrdemExibicaoAscNomeAsc(walletId)
-                : categoriaRepository.findByCarteiraIdAndTipoOrderByOrdemExibicaoAscNomeAsc(walletId, type);
+                ? categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(
+                        walletId, currentUser.getId())
+                : categoriaRepository.findByCarteiraIdAndUsuarioIdAndTipoOrderByOrdemExibicaoAscNomeAsc(
+                        walletId, currentUser.getId(), type);
         return categorias.stream().map(this::toResponse).toList();
     }
 
@@ -60,7 +64,7 @@ public class CategoryService {
     @Transactional
     public CategoryResponse update(Long walletId, Long id, CategoryRequest request) {
         auth.requireEditor(walletId);
-        Categoria categoria = findInWallet(walletId, id);
+        Categoria categoria = findOwnedInWallet(walletId, id);
         apply(categoria, request, false);
         return toResponse(categoriaRepository.save(categoria));
     }
@@ -68,34 +72,32 @@ public class CategoryService {
     @Transactional
     public void delete(Long walletId, Long id) {
         auth.requireEditor(walletId);
-        Categoria categoria = findInWallet(walletId, id);
+        Categoria categoria = findOwnedInWallet(walletId, id);
         if (transacaoRepository.existsByCategoriaId(id)) {
             throw new BusinessException("Não é possível excluir uma categoria que possui transações vinculadas.");
         }
         categoriaRepository.delete(categoria);
     }
 
-    public Categoria findInWallet(Long walletId, Long id) {
-        Categoria categoria = categoriaRepository.findById(id)
+    public Categoria findOwnedInWallet(Long walletId, Long id) {
+        Long currentUserId = currentUserService.get().getId();
+        return categoriaRepository.findByIdAndCarteiraIdAndUsuarioId(id, walletId, currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
-        if (categoria.getCarteira() == null || !categoria.getCarteira().getId().equals(walletId)) {
-            throw new ResourceNotFoundException("Categoria não encontrada nesta carteira.");
-        }
-        return categoria;
     }
 
-    private void migrateLegacyCategoriesIfNeeded(Long walletId) {
-        if (!categoriaRepository.findByCarteiraIdOrderByOrdemExibicaoAscNomeAsc(walletId).isEmpty()) return;
+    private void migrateLegacyCategoriesIfNeeded(Long walletId, Usuario currentUser) {
+        if (!categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(
+                walletId, currentUser.getId()).isEmpty()) return;
 
         Carteira wallet = getWallet(walletId);
         List<Categoria> legacy = categoriaRepository
-                .findByUsuarioIdAndCarteiraIsNullOrderByOrdemExibicaoAscNomeAsc(wallet.getDono().getId());
+                .findByUsuarioIdAndCarteiraIsNullOrderByOrdemExibicaoAscNomeAsc(currentUser.getId());
         if (legacy.isEmpty()) return;
 
         List<Categoria> copies = legacy.stream().map(old -> {
             Categoria copy = new Categoria();
             copy.setCarteira(wallet);
-            copy.setUsuario(old.getUsuario());
+            copy.setUsuario(currentUser);
             copy.setNome(old.getNome());
             copy.setTipo(old.getTipo());
             copy.setIcone(old.getIcone());

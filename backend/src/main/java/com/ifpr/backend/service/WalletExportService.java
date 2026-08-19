@@ -78,7 +78,7 @@ public class WalletExportService {
             out.append(t.getData().format(DATE_FORMAT)).append(" | ")
                     .append(typeLabel(t.getTipo())).append(" | ")
                     .append(text(t.getDescricao(), "Sem descrição")).append(" | ")
-                    .append(t.getCategoria() == null ? "Sem categoria" : t.getCategoria().getNome()).append(" | ")
+                    .append(categoryLabel(t)).append(" | ")
                     .append(t.getValor().toPlainString()).append(" | ")
                     .append(text(t.getFormaPagamento(), "Não informado")).append(" | ")
                     .append(text(t.getObservacoes(), "")).append(" | ")
@@ -146,7 +146,7 @@ public class WalletExportService {
                 date.setCellStyle(dateStyle);
                 row.createCell(1).setCellValue(typeLabel(t.getTipo()));
                 row.createCell(2).setCellValue(text(t.getDescricao(), "Sem descrição"));
-                row.createCell(3).setCellValue(t.getCategoria() == null ? "Sem categoria" : t.getCategoria().getNome());
+                row.createCell(3).setCellValue(categoryLabel(t));
                 Cell amount = row.createCell(4);
                 amount.setCellValue(t.getValor().doubleValue());
                 amount.setCellStyle(moneyStyle);
@@ -176,6 +176,16 @@ public class WalletExportService {
         } catch (IOException ex) {
             throw new IllegalStateException("Não foi possível gerar o arquivo XLSX.", ex);
         }
+    }
+
+
+    private String categoryLabel(Transacao transaction) {
+        // A exportação representa as transações da carteira. Por isso, mantém o nome
+        // da categoria vinculada à transação, mesmo quando a categoria pertence a
+        // outro usuário. Isso não concede acesso ao cadastro da categoria.
+        return transaction.getCategoria() == null
+                ? "Sem categoria"
+                : transaction.getCategoria().getNome();
     }
 
     private TipoTransacao parseType(String value) {

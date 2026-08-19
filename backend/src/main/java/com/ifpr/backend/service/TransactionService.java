@@ -44,6 +44,12 @@ public class TransactionService {
     public Page<TransactionResponse> list(Long walletId, TipoTransacao type, Long categoryId,
                                           LocalDate startDate, LocalDate endDate, Pageable pageable) {
         auth.requireMember(walletId);
+        Long currentUserId = currentUserService.get().getId();
+        if (categoryId != null) {
+            categoriaRepository.findByIdAndCarteiraIdAndUsuarioId(categoryId, walletId, currentUserId)
+                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+        }
+
         Specification<Transacao> spec = (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             predicates.add(cb.equal(root.get("carteira").get("id"), walletId));
@@ -53,13 +59,15 @@ public class TransactionService {
             if (endDate != null) predicates.add(cb.lessThanOrEqualTo(root.<LocalDate>get("data"), endDate));
             return cb.and(predicates.toArray(Predicate[]::new));
         };
-        return transacaoRepository.findAll(spec, pageable).map(this::toResponse);
+        return transacaoRepository.findAll(spec, pageable)
+                .map(t -> toResponse(t, currentUserId));
     }
 
     @Transactional(readOnly = true)
     public TransactionResponse get(Long walletId, Long id) {
         auth.requireMember(walletId);
-        return toResponse(findInWallet(walletId, id));
+        Long currentUserId = currentUserService.get().getId();
+        return toResponse(findInWallet(walletId, id), currentUserId);
     }
 
     @Transactional
@@ -67,19 +75,21 @@ public class TransactionService {
         auth.requireEditor(walletId);
         Carteira wallet = carteiraRepository.findById(walletId)
                 .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
+        Usuario currentUser = currentUserService.get();
         Transacao transaction = new Transacao();
         transaction.setCarteira(wallet);
-        transaction.setCriadoPor(currentUserService.get());
-        apply(transaction, request);
-        return toResponse(transacaoRepository.save(transaction));
+        transaction.setCriadoPor(currentUser);
+        apply(transaction, request, currentUser.getId());
+        return toResponse(transacaoRepository.save(transaction), currentUser.getId());
     }
 
     @Transactional
     public TransactionResponse update(Long walletId, Long id, TransactionRequest request) {
         auth.requireEditor(walletId);
         Transacao transaction = findInWallet(walletId, id);
-        apply(transaction, request);
-        return toResponse(transacaoRepository.save(transaction));
+        Long currentUserId = currentUserService.get().getId();
+        apply(transaction, request, currentUserId);
+        return toResponse(transacaoRepository.save(transaction), currentUserId);
     }
 
     @Transactional
@@ -93,6 +103,7 @@ public class TransactionService {
         auth.requireMember(walletId);
         Carteira wallet = carteiraRepository.findById(walletId)
                 .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
+        Long currentUserId = currentUserService.get().getId();
 
         List<Transacao> items = transacaoRepository.findByCarteiraId(walletId).stream()
                 .filter(t -> startDate == null || !t.getData().isBefore(startDate))
@@ -108,10 +119,13 @@ public class TransactionService {
         Map<YearMonth, MonthAccumulator> months = new TreeMap<>();
 
         for (Transacao t : items) {
-            String catKey = t.getCategoria() == null ? "null" : t.getCategoria().getId().toString();
+            Categoria visibleCategory = isCategoryOwnedBy(t.getCategoria(), currentUserId)
+                    ? t.getCategoria()
+                    : null;
+            String catKey = visibleCategory == null ? "null" : visibleCategory.getId().toString();
             CategoryTotalAccumulator cat = categories.computeIfAbsent(catKey, key -> new CategoryTotalAccumulator(
-                    t.getCategoria() == null ? null : t.getCategoria().getId(),
-                    t.getCategoria() == null ? "Sem categoria" : t.getCategoria().getNome()));
+                    visibleCategory == null ? null : visibleCategory.getId(),
+                    visibleCategory == null ? "Sem categoria" : visibleCategory.getNome()));
             cat.total = cat.total.add(t.getValor());
 
             YearMonth ym = YearMonth.from(t.getData());
@@ -129,7 +143,7 @@ public class TransactionService {
         return new SummaryResponse(income, expense, balance, items.size(), byCategory, byMonth);
     }
 
-    private void apply(Transacao transaction, TransactionRequest request) {
+    private void apply(Transacao transaction, TransactionRequest request, Long currentUserId) {
         transaction.setTipo(request.type());
         transaction.setValor(request.amount());
         transaction.setDescricao(blankToNull(request.description()));
@@ -140,16 +154,24 @@ public class TransactionService {
         transaction.setFormaPagamento(blankToNull(request.paymentMethod()));
 
         if (request.categoryId() == null) {
-            transaction.setCategoria(null);
+            // Uma categoria de outro usuário pode estar ligada a uma transação compartilhada.
+            // Ela fica invisível e não pode ser removida indiretamente por quem não é seu dono.
+            if (transaction.getCategoria() == null
+                    || isCategoryOwnedBy(transaction.getCategoria(), currentUserId)) {
+                transaction.setCategoria(null);
+            }
         } else {
             Categoria category = categoriaRepository.findById(request.categoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+            if (!isCategoryOwnedBy(category, currentUserId)) {
+                throw new ResourceNotFoundException("Categoria não encontrada.");
+            }
+
             Long walletId = transaction.getCarteira().getId();
             boolean sameWallet = category.getCarteira() != null && category.getCarteira().getId().equals(walletId);
-            boolean legacyOwnerCategory = category.getCarteira() == null
-                    && category.getUsuario().getId().equals(transaction.getCarteira().getDono().getId());
-            if (!sameWallet && !legacyOwnerCategory) {
-                throw new BusinessException("A categoria deve pertencer à mesma carteira da transação.");
+            boolean ownLegacyCategory = category.getCarteira() == null;
+            if (!sameWallet && !ownLegacyCategory) {
+                throw new ResourceNotFoundException("Categoria não encontrada.");
             }
             if (!category.isAtivo()) {
                 throw new BusinessException("A categoria selecionada está inativa.");
@@ -174,13 +196,26 @@ public class TransactionService {
         return t;
     }
 
-    private TransactionResponse toResponse(Transacao t) {
+    private TransactionResponse toResponse(Transacao t, Long currentUserId) {
+        Categoria category = t.getCategoria();
+        boolean ownCategory = isCategoryOwnedBy(category, currentUserId);
+
+        // O nome da categoria faz parte da informação da transação compartilhada e
+        // continua visível para os membros da carteira. O ID só é exposto ao dono,
+        // evitando que outro usuário reutilize a categoria em novas transações.
         return new TransactionResponse(t.getId(), t.getCarteira().getId(),
-                t.getCategoria() == null ? null : t.getCategoria().getId(),
-                t.getCategoria() == null ? null : t.getCategoria().getNome(),
+                ownCategory ? category.getId() : null,
+                category == null ? null : category.getNome(),
                 t.getCriadoPor().getId(), t.getCriadoPor().getNome(), t.getTipo(), t.getValor(),
                 t.getDescricao(), t.getData(), t.getAnexoUrl(), t.getObservacoes(), t.isRecorrente(),
                 t.getFormaPagamento(), t.getCriadoEm(), t.getAtualizadoEm());
+    }
+
+
+    private boolean isCategoryOwnedBy(Categoria category, Long userId) {
+        return category != null
+                && category.getUsuario() != null
+                && category.getUsuario().getId().equals(userId);
     }
 
     private static class CategoryTotalAccumulator {
