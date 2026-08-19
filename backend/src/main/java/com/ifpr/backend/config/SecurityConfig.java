@@ -39,16 +39,16 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(
-                            "/auth/**",
-                            "/actuator/health",
-                            "/swagger-ui/**",
-                            "/swagger-ui.html",
-                            "/v3/api-docs/**")
-                    .permitAll()
+                .requestMatchers(
+                    "/auth/**",
+                    "/actuator/health",
+                    "/swagger-ui/**",
+                    "/swagger-ui.html",
+                    "/v3/api-docs/**"
+                ).permitAll()
                     .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                    .requestMatchers("/api/**").authenticated()
-                    .anyRequest().permitAll())
+                .requestMatchers("/api/**").authenticated()
+                .anyRequest().permitAll())
             .exceptionHandling(errors -> errors
                     .authenticationEntryPoint((request, response, ex) -> {
                         response.setStatus(HttpStatus.UNAUTHORIZED.value());
