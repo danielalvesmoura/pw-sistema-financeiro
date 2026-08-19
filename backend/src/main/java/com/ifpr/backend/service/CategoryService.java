@@ -40,13 +40,15 @@ public class CategoryService {
     @Transactional
     public List<CategoryResponse> list(Long walletId, TipoTransacao type) {
         auth.requireMember(walletId);
+
         Usuario currentUser = currentUserService.get();
+
         migrateLegacyCategoriesIfNeeded(walletId, currentUser);
+        
         List<Categoria> categorias = type == null
-                ? categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(
-                        walletId, currentUser.getId())
-                : categoriaRepository.findByCarteiraIdAndUsuarioIdAndTipoOrderByOrdemExibicaoAscNomeAsc(
-                        walletId, currentUser.getId(), type);
+            ? categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(walletId, currentUser.getId())
+            : categoriaRepository.findByCarteiraIdAndUsuarioIdAndTipoOrderByOrdemExibicaoAscNomeAsc(walletId, currentUser.getId(), type);
+            
         return categorias.stream().map(this::toResponse).toList();
     }
 
