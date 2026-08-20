@@ -28,14 +28,12 @@ public class TokenRedefinicaoSenha {
     @Column(nullable = false)
     private boolean utilizado;
 
-    // Atributos extras sugeridos no enunciado.
     @Column(length = 64)
     private String ipOrigem;
 
     @Column(length = 40)
     private String tipoSolicitacao = "RECUPERACAO_SENHA";
 
-    // Extras úteis para auditoria simples.
     private LocalDateTime criadoEm;
 
     private LocalDateTime utilizadoEm;

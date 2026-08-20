@@ -13,13 +13,10 @@ public class Categoria {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Dono da categoria. Somente este usuário pode acessá-la e gerenciá-la.
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    // A carteira apenas contextualiza onde a categoria é usada; ela não torna a categoria compartilhada.
-    // nullable=true preserva compatibilidade com categorias criadas em versões antigas.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "carteira_id")
     private Carteira carteira;

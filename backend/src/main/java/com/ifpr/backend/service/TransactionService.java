@@ -42,12 +42,14 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public Page<TransactionResponse> list(Long walletId, TipoTransacao type, Long categoryId,
-                                          LocalDate startDate, LocalDate endDate, Pageable pageable) {
+        LocalDate startDate, LocalDate endDate, Pageable pageable) {
         auth.requireMember(walletId);
+
         Long currentUserId = currentUserService.get().getId();
+
         if (categoryId != null) {
             categoriaRepository.findByIdAndCarteiraIdAndUsuarioId(categoryId, walletId, currentUserId)
-                    .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
         }
 
         Specification<Transacao> spec = (root, query, cb) -> {
@@ -57,15 +59,19 @@ public class TransactionService {
 
             if (type != null) 
                 predicates.add(cb.equal(root.get("tipo"), type));
+
             if (categoryId != null) 
                 predicates.add(cb.equal(root.get("categoria").get("id"), categoryId));
+
             if (startDate != null) 
                 predicates.add(cb.greaterThanOrEqualTo(root.<LocalDate>get("data"), startDate));
+            
             if (endDate != null) 
                 predicates.add(cb.lessThanOrEqualTo(root.<LocalDate>get("data"), endDate));
 
             return cb.and(predicates.toArray(Predicate[]::new));
         };
+        
         return transacaoRepository.findAll(spec, pageable)
                 .map(t -> toResponse(t, currentUserId));
     }

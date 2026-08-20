@@ -30,12 +30,10 @@ public class CarteiraMembro {
     @Column(nullable = false)
     private LocalDateTime entradoEm;
 
-    // Atributos extras sugeridos no enunciado.
     private Boolean convitePendente = false;
 
     private LocalDateTime conviteExpiraEm;
 
-    // Extra simples para permitir desativar um vínculo sem apagá-lo imediatamente.
     private Boolean ativo = true;
 
     @PrePersist
@@ -45,7 +43,6 @@ public class CarteiraMembro {
         if (ativo == null) ativo = true;
     }
 
-    // Mantidos apenas porque possuem regra além de um getter simples.
     public boolean isConvitePendente() {
         return Boolean.TRUE.equals(convitePendente);
     }

@@ -24,7 +24,6 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String senhaCriptografada;
 
-    // Preferência simples do usuário.
     @Column(length = 3)
     private String moedaPadrao = "BRL";
 
@@ -42,8 +41,12 @@ public class Usuario {
     void prePersist() {
         criadoEm = LocalDateTime.now();
         atualizadoEm = criadoEm;
-        if (moedaPadrao == null || moedaPadrao.isBlank()) moedaPadrao = "BRL";
-        if (ativo == null) ativo = true;
+
+        if (moedaPadrao == null || moedaPadrao.isBlank()) 
+            moedaPadrao = "BRL";
+
+        if (ativo == null) 
+            ativo = true;
     }
 
     @PreUpdate
@@ -51,7 +54,6 @@ public class Usuario {
         atualizadoEm = LocalDateTime.now();
     }
 
-    // Mantidos apenas porque possuem regra além de um getter simples.
     public String getMoedaPadrao() {
         return moedaPadrao == null || moedaPadrao.isBlank() ? "BRL" : moedaPadrao;
     }

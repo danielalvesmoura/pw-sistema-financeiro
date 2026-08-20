@@ -43,9 +43,15 @@ public class Carteira {
     void prePersist() {
         criadoEm = LocalDateTime.now();
         atualizadoEm = criadoEm;
-        if (moeda == null || moeda.isBlank()) moeda = "BRL";
-        if (saldoInicial == null) saldoInicial = BigDecimal.ZERO;
-        if (arquivada == null) arquivada = false;
+
+        if (moeda == null || moeda.isBlank()) 
+            moeda = "BRL";
+        
+        if (saldoInicial == null) 
+            saldoInicial = BigDecimal.ZERO;
+        
+        if (arquivada == null) 
+            arquivada = false;
     }
 
     @PreUpdate

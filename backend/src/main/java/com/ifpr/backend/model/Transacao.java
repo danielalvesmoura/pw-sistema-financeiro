@@ -42,14 +42,12 @@ public class Transacao {
     @Column(nullable = false)
     private LocalDate data;
 
-    // Atributos extras sugeridos no enunciado.
     @Column(length = 500)
     private String anexoUrl;
 
     @Column(length = 1000)
     private String observacoes;
 
-    // Extra simples para diferenciar dinheiro, cartão, PIX etc.
     @Column(length = 40)
     private String formaPagamento;
 
