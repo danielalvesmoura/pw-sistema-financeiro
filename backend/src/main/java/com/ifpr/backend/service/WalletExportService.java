@@ -211,9 +211,7 @@ public class WalletExportService {
 
 
     private String categoryLabel(Transacao transaction) {
-        // A exportação representa as transações da carteira. Por isso, mantém o nome
-        // da categoria vinculada à transação, mesmo quando a categoria pertence a
-        // outro usuário. Isso não concede acesso ao cadastro da categoria.
+        
         return transaction.getCategoria() == null
             ? "Sem categoria"
             : transaction.getCategoria().getNome();

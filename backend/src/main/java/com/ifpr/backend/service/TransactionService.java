@@ -132,9 +132,9 @@ public class TransactionService {
         Long currentUserId = currentUserService.get().getId();
 
         List<Transacao> items = transacaoRepository.findByCarteiraId(walletId).stream()
-                .filter(t -> startDate == null || !t.getData().isBefore(startDate))
-                .filter(t -> endDate == null || !t.getData().isAfter(endDate))
-                .toList();
+            .filter(t -> startDate == null || !t.getData().isBefore(startDate))
+            .filter(t -> endDate == null || !t.getData().isAfter(endDate))
+            .toList();
 
         BigDecimal income = items.stream().filter(t -> t.getTipo() == TipoTransacao.INCOME)
                 .map(Transacao::getValor).reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -147,14 +147,15 @@ public class TransactionService {
 
         for (Transacao t : items) {
             Categoria visibleCategory = isCategoryOwnedBy(t.getCategoria(), currentUserId)
-                    ? t.getCategoria()
-                    : null;
+                ? t.getCategoria()
+                : null;
 
             String catKey = visibleCategory == null ? "null" : visibleCategory.getId().toString();
 
             CategoryTotalAccumulator cat = categories.computeIfAbsent(catKey, key -> new CategoryTotalAccumulator(
-                    visibleCategory == null ? null : visibleCategory.getId(),
-                    visibleCategory == null ? "Sem categoria" : visibleCategory.getNome()));
+                visibleCategory == null ? null : visibleCategory.getId(),
+                visibleCategory == null ? "Sem categoria" : visibleCategory.getNome()
+            ));
 
             cat.total = cat.total.add(t.getValor());
 
@@ -188,8 +189,6 @@ public class TransactionService {
         transaction.setFormaPagamento(blankToNull(request.paymentMethod()));
 
         if (request.categoryId() == null) {
-            // uma categoria de outro usuario pode estar ligada a uma transação compartilhada
-            // ela fica invisível e não pode ser removida indiretamente por quem não é o dono
             if (transaction.getCategoria() == null || isCategoryOwnedBy(transaction.getCategoria(), currentUserId)) {
                 transaction.setCategoria(null);
             }
@@ -239,8 +238,6 @@ public class TransactionService {
         Categoria category = t.getCategoria();
         boolean ownCategory = isCategoryOwnedBy(category, currentUserId);
 
-        // O nome da categoria faz parte da informação da transação compartilhada e continua visível para os membros da carteira. O ID só é exposto ao dono
-        // evitando que outro usuário reutilize a categoria em novas transações.
         return new TransactionResponse(t.getId(), t.getCarteira().getId(),
             ownCategory ? category.getId() : null,
             category == null ? null : category.getNome(),
