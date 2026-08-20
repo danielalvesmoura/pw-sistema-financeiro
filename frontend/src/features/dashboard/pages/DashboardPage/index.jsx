@@ -63,18 +63,17 @@ export default function DashboardPage() {
                 size: 5,
                 sort: "date,desc",
             }),
-        ])
-            .then(([summaryData, page]) => {
+        ]).then(([summaryData, page]) => {
                 setSummary(summaryData);
                 setRecent(page.content || []);
             })
-            .catch((err) =>
+        .catch((err) =>
                 setError(
                     err?.response?.data?.message ||
                         "Erro ao carregar dashboard.",
                 ),
             )
-            .finally(() => setLoading(false));
+        .finally(() => setLoading(false));
     }, [walletId]);
 
     const selectedWallet = wallets.find(
