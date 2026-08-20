@@ -31,26 +31,41 @@ public class UserService {
     @Transactional
     public UserResponse update(UpdateUserRequest request) {
         Usuario usuario = currentUserService.get();
+
         usuario.setNome(request.name().trim());
+
         if (request.defaultCurrency() != null && !request.defaultCurrency().isBlank()) {
             usuario.setMoedaPadrao(request.defaultCurrency().trim().toUpperCase());
         }
+
         return toResponse(usuarioRepository.save(usuario));
     }
 
     @Transactional
     public MessageResponse changePassword(ChangePasswordRequest request) {
         Usuario usuario = currentUserService.get();
+
         if (!passwordEncoder.matches(request.currentPassword(), usuario.getSenhaCriptografada())) {
             throw new BusinessException("Senha atual incorreta.");
         }
+
         usuario.setSenhaCriptografada(passwordEncoder.encode(request.newPassword()));
+
         usuarioRepository.save(usuario);
+
         return new MessageResponse("Senha alterada com sucesso.");
     }
 
     private UserResponse toResponse(Usuario usuario) {
-        return new UserResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getMoedaPadrao(),
-                usuario.isAtivo(), usuario.getUltimoAcessoEm(), usuario.getCriadoEm(), usuario.getAtualizadoEm());
+        return new UserResponse(
+            usuario.getId(), 
+            usuario.getNome(), 
+            usuario.getEmail(), 
+            usuario.getMoedaPadrao(),
+            usuario.isAtivo(), 
+            usuario.getUltimoAcessoEm(), 
+            usuario.getCriadoEm(), 
+            usuario.getAtualizadoEm()
+        );
     }
 }

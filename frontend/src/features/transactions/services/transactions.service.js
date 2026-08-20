@@ -8,7 +8,7 @@ export const transactionService = {
         );
 
         return data;
-    },
+    }, 
 
     async create(walletId, payload) {
         const { data } = await api.post(

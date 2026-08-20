@@ -41,56 +41,64 @@ public class WalletExportService {
     @Transactional(readOnly = true)
     public ExportedWallet export(Long walletId, String typeValue, String formatValue) {
         auth.requireMember(walletId);
+
         Carteira wallet = carteiraRepository.findById(walletId)
                 .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
 
         TipoTransacao type = parseType(typeValue);
         ExportFormat format = parseFormat(formatValue);
+
         List<Transacao> transactions = transacaoRepository.findByCarteiraId(walletId).stream()
-                .filter(t -> type == null || t.getTipo() == type)
-                .sorted(Comparator.comparing(Transacao::getData).reversed()
-                        .thenComparing(Transacao::getId, Comparator.reverseOrder()))
-                .toList();
+            .filter(t -> type == null || t.getTipo() == type)
+            .sorted(Comparator.comparing(Transacao::getData).reversed()
+                    .thenComparing(Transacao::getId, Comparator.reverseOrder()))
+            .toList();
 
         String suffix = type == null ? "completa" : type == TipoTransacao.INCOME ? "receitas" : "despesas";
         String baseName = sanitize(wallet.getNome()) + "_" + suffix;
 
         if (format == ExportFormat.TXT) {
             return new ExportedWallet(
-                    baseName + ".txt",
-                    "text/plain; charset=UTF-8",
-                    createTxt(wallet, transactions, type));
+                baseName + ".txt","text/plain; charset=UTF-8",
+                createTxt(wallet, transactions, type)
+            );
         }
+
         return new ExportedWallet(
-                baseName + ".xlsx",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                createXlsx(wallet, transactions, type));
+            baseName + ".xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            createXlsx(wallet, transactions, type)
+        );
     }
 
     private byte[] createTxt(Carteira wallet, List<Transacao> items, TipoTransacao filter) {
         StringBuilder out = new StringBuilder();
+
         out.append("Carteira: ").append(wallet.getNome()).append('\n');
         out.append("Conteúdo: ").append(filterLabel(filter)).append('\n');
         out.append("Exportado em: ").append(LocalDate.now().format(DATE_FORMAT)).append("\n\n");
         out.append("Data | Tipo | Descrição | Categoria | Valor | Forma de pagamento | Observações | Criado por\n");
         out.append("--------------------------------------------------------------------------------------------\n");
+
         for (Transacao t : items) {
             out.append(t.getData().format(DATE_FORMAT)).append(" | ")
-                    .append(typeLabel(t.getTipo())).append(" | ")
-                    .append(text(t.getDescricao(), "Sem descrição")).append(" | ")
-                    .append(categoryLabel(t)).append(" | ")
-                    .append(t.getValor().toPlainString()).append(" | ")
-                    .append(text(t.getFormaPagamento(), "Não informado")).append(" | ")
-                    .append(text(t.getObservacoes(), "")).append(" | ")
-                    .append(t.getCriadoPor().getNome()).append('\n');
+            .append(typeLabel(t.getTipo())).append(" | ")
+            .append(text(t.getDescricao(), "Sem descrição")).append(" | ")
+            .append(categoryLabel(t)).append(" | ")
+            .append(t.getValor().toPlainString()).append(" | ")
+            .append(text(t.getFormaPagamento(), "Não informado")).append(" | ")
+            .append(text(t.getObservacoes(), "")).append(" | ")
+            .append(t.getCriadoPor().getNome()).append('\n');
         }
+
         out.append("\nTotal de lançamentos: ").append(items.size()).append('\n');
+
         out.append("Total: ")
-                .append(items.stream()
-                        .map(Transacao::getValor)
-                        .reduce(BigDecimal.ZERO, BigDecimal::add)
-                        .toPlainString())
-                .append('\n');
+            .append(items.stream()
+                .map(Transacao::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add)
+                .toPlainString())
+            .append('\n');
+
         return out.toString().getBytes(StandardCharsets.UTF_8);
     }
 
@@ -99,6 +107,7 @@ public class WalletExportService {
             Sheet sheet = workbook.createSheet("Transações");
             CellStyle headerStyle = workbook.createCellStyle();
             Font headerFont = workbook.createFont();
+
             headerFont.setBold(true);
             headerStyle.setFont(headerFont);
 
@@ -109,66 +118,88 @@ public class WalletExportService {
             moneyStyle.setDataFormat(workbook.createDataFormat().getFormat("#,##0.00"));
 
             int rowIndex = 0;
+
             Row title = sheet.createRow(rowIndex++);
+
             title.createCell(0).setCellValue("Carteira");
             title.createCell(1).setCellValue(wallet.getNome());
+
             Row content = sheet.createRow(rowIndex++);
+
             content.createCell(0).setCellValue("Conteúdo");
             content.createCell(1).setCellValue(filterLabel(filter));
+
             Row exported = sheet.createRow(rowIndex++);
             exported.createCell(0).setCellValue("Exportado em");
+
             Cell exportedDate = exported.createCell(1);
             exportedDate.setCellValue(java.sql.Date.valueOf(LocalDate.now()));
             exportedDate.setCellStyle(dateStyle);
+
             rowIndex++;
 
             String[] headers = {
-                    "Data",
-                    "Tipo",
-                    "Descrição",
-                    "Categoria",
-                    "Valor",
-                    "Forma de pagamento",
-                    "Observações",
-                    "Criado por"
+                "Data",
+                "Tipo",
+                "Descrição",
+                "Categoria",
+                "Valor",
+                "Forma de pagamento",
+                "Observações",
+                "Criado por"
             };
+
             Row header = sheet.createRow(rowIndex++);
+
             for (int i = 0; i < headers.length; i++) {
                 Cell cell = header.createCell(i);
+
                 cell.setCellValue(headers[i]);
                 cell.setCellStyle(headerStyle);
             }
 
             for (Transacao t : items) {
                 Row row = sheet.createRow(rowIndex++);
+
                 Cell date = row.createCell(0);
+
                 date.setCellValue(java.sql.Date.valueOf(t.getData()));
                 date.setCellStyle(dateStyle);
+
                 row.createCell(1).setCellValue(typeLabel(t.getTipo()));
                 row.createCell(2).setCellValue(text(t.getDescricao(), "Sem descrição"));
                 row.createCell(3).setCellValue(categoryLabel(t));
+
                 Cell amount = row.createCell(4);
+
                 amount.setCellValue(t.getValor().doubleValue());
                 amount.setCellStyle(moneyStyle);
+
                 row.createCell(5).setCellValue(text(t.getFormaPagamento(), "Não informado"));
                 row.createCell(6).setCellValue(text(t.getObservacoes(), ""));
                 row.createCell(7).setCellValue(t.getCriadoPor().getNome());
             }
 
             Row total = sheet.createRow(rowIndex + 1);
+
             total.createCell(3).setCellValue("Total");
+
             Cell totalValue = total.createCell(4);
+
             totalValue.setCellValue(
-                    items.stream()
-                            .map(Transacao::getValor)
-                            .reduce(BigDecimal.ZERO, BigDecimal::add)
-                            .doubleValue());
+                items.stream()
+                    .map(Transacao::getValor)
+                    .reduce(BigDecimal.ZERO, BigDecimal::add)
+                    .doubleValue());
+
             totalValue.setCellStyle(moneyStyle);
 
             int[] widths = {14, 12, 30, 22, 15, 22, 35, 22};
+
             for (int i = 0; i < widths.length; i++) {
                 sheet.setColumnWidth(i, widths[i] * 256);
             }
+
             sheet.createFreezePane(0, 5);
 
             workbook.write(output);
@@ -184,8 +215,8 @@ public class WalletExportService {
         // da categoria vinculada à transação, mesmo quando a categoria pertence a
         // outro usuário. Isso não concede acesso ao cadastro da categoria.
         return transaction.getCategoria() == null
-                ? "Sem categoria"
-                : transaction.getCategoria().getNome();
+            ? "Sem categoria"
+            : transaction.getCategoria().getNome();
     }
 
     private TipoTransacao parseType(String value) {
@@ -230,10 +261,10 @@ public class WalletExportService {
 
     private String sanitize(String value) {
         String cleaned = value == null
-                ? "carteira"
-                : value.trim().replaceAll(
-                        "[^a-zA-Z0-9áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ_-]+",
-                        "_");
+            ? "carteira"
+            : value.trim().replaceAll(
+                    "[^a-zA-Z0-9áàâãéêíóôõúçÁÀÂÃÉÊÍÓÔÕÚÇ_-]+",
+                    "_");
         return cleaned.isBlank() ? "carteira" : cleaned;
     }
 
@@ -243,8 +274,8 @@ public class WalletExportService {
     }
 
     public record ExportedWallet(
-            String fileName,
-            String contentType,
-            byte[] content) {}
+        String fileName,
+        String contentType,
+        byte[] content) {}
 
 }

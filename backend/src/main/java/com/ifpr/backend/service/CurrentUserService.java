@@ -16,6 +16,7 @@ public class CurrentUserService {
 
     public Usuario get() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        
         return usuarioRepository.findByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
     }

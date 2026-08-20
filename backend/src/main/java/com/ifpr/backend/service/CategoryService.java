@@ -55,34 +55,45 @@ public class CategoryService {
     @Transactional
     public CategoryResponse create(Long walletId, CategoryRequest request) {
         auth.requireEditor(walletId);
+
         Carteira wallet = getWallet(walletId);
         Categoria categoria = new Categoria();
+
         categoria.setCarteira(wallet);
         categoria.setUsuario(currentUserService.get());
+
         apply(categoria, request, true);
+
         return toResponse(categoriaRepository.save(categoria));
     }
 
     @Transactional
     public CategoryResponse update(Long walletId, Long id, CategoryRequest request) {
         auth.requireEditor(walletId);
+
         Categoria categoria = findOwnedInWallet(walletId, id);
+
         apply(categoria, request, false);
+
         return toResponse(categoriaRepository.save(categoria));
     }
 
     @Transactional
     public void delete(Long walletId, Long id) {
         auth.requireEditor(walletId);
+
         Categoria categoria = findOwnedInWallet(walletId, id);
+
         if (transacaoRepository.existsByCategoriaId(id)) {
             throw new BusinessException("Não é possível excluir uma categoria que possui transações vinculadas.");
         }
+
         categoriaRepository.delete(categoria);
     }
 
     public Categoria findOwnedInWallet(Long walletId, Long id) {
         Long currentUserId = currentUserService.get().getId();
+
         return categoriaRepository.findByIdAndCarteiraIdAndUsuarioId(id, walletId, currentUserId)
                 .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
     }
@@ -92,8 +103,10 @@ public class CategoryService {
                 walletId, currentUser.getId()).isEmpty()) return;
 
         Carteira wallet = getWallet(walletId);
+
         List<Categoria> legacy = categoriaRepository
                 .findByUsuarioIdAndCarteiraIsNullOrderByOrdemExibicaoAscNomeAsc(currentUser.getId());
+
         if (legacy.isEmpty()) return;
 
         List<Categoria> copies = legacy.stream().map(old -> {
@@ -108,6 +121,7 @@ public class CategoryService {
             copy.setAtivo(old.isAtivo());
             return copy;
         }).toList();
+
         categoriaRepository.saveAll(copies);
     }
 
@@ -133,10 +147,14 @@ public class CategoryService {
             blankToNull(request.description())
         );
         
-        if (request.displayOrder() != null) categoria.setOrdemExibicao(request.displayOrder());
-        else if (creating) categoria.setOrdemExibicao(0);
-        if (request.active() != null) categoria.setAtivo(request.active());
-        else if (creating) categoria.setAtivo(true);
+        if (request.displayOrder() != null) 
+            categoria.setOrdemExibicao(request.displayOrder());
+        else if (creating) 
+            categoria.setOrdemExibicao(0);
+        if (request.active() != null) 
+            categoria.setAtivo(request.active());
+        else if (creating) 
+            categoria.setAtivo(true);
     }
 
     private String blankToNull(String value) {
