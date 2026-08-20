@@ -33,9 +33,6 @@ export default function TransactionsPage() {
     const [error, setError] = useState("");
     const [message, setMessage] = useState("");
     const [loading, setLoading] = useState(false);
-    const [exportType, setExportType] = useState("ALL");
-    const [exportFormat, setExportFormat] = useState("XLSX");
-    const [exporting, setExporting] = useState(false);
 
     const selectedWallet = wallets.find(
         (wallet) => String(wallet.id) === String(walletId),
@@ -197,45 +194,6 @@ export default function TransactionsPage() {
         }
     };
 
-    const exportWallet = async () => {
-        if (!walletId) {
-            return;
-        }
-
-        setExporting(true);
-        setError("");
-
-        try {
-            const response = await transactionService.export(
-                walletId,
-                exportType,
-                exportFormat,
-            );
-
-            const disposition = response.headers?.["content-disposition"] || "";
-            const match = disposition.match(/filename="?([^";]+)"?/i);
-            const fallback = `carteira_${walletId}.${exportFormat.toLowerCase()}`;
-            const filename = match?.[1] || fallback;
-            const url = window.URL.createObjectURL(response.data);
-            const link = document.createElement("a");
-
-            link.href = url;
-            link.download = filename;
-
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
-            window.URL.revokeObjectURL(url);
-        } catch (err) {
-            setError(
-                err?.response?.data?.message ||
-                    "Não foi possível exportar a carteira.",
-            );
-        } finally {
-            setExporting(false);
-        }
-    };
-
     return (
         <section>
             <div className="transactions-header">
@@ -261,40 +219,6 @@ export default function TransactionsPage() {
                                 </option>
                             ))}
                         </select>
-
-                        <div className="export-controls">
-                            <select
-                                className="simple-select"
-                                value={exportType}
-                                onChange={(event) =>
-                                    setExportType(event.target.value)
-                                }
-                            >
-                                <option value="ALL">Carteira inteira</option>
-                                <option value="INCOME">Apenas receitas</option>
-                                <option value="EXPENSE">Apenas despesas</option>
-                            </select>
-
-                            <select
-                                className="simple-select"
-                                value={exportFormat}
-                                onChange={(event) =>
-                                    setExportFormat(event.target.value)
-                                }
-                            >
-                                <option value="XLSX">XLSX</option>
-                                <option value="TXT">TXT</option>
-                            </select>
-
-                            <button
-                                type="button"
-                                className="simple-button export-button"
-                                onClick={exportWallet}
-                                disabled={exporting}
-                            >
-                                {exporting ? "Exportando..." : "Exportar"}
-                            </button>
-                        </div>
                     </div>
                 )}
             </div>

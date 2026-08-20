@@ -85,7 +85,6 @@ Com o backend em execução:
 - Arquitetura em camadas mantendo regras de negócio nos services.
 - DTOs para não retornar entidades JPA diretamente.
 - JWT stateless para autenticação da API.
-- Exportação TXT/XLSX como funcionalidade adicional do sistema.
 
 ## Tecnologias principais
 

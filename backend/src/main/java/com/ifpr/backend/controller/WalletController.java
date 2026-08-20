@@ -2,13 +2,10 @@ package com.ifpr.backend.controller;
 
 import static com.ifpr.backend.dto.WalletDtos.*;
 
-import com.ifpr.backend.service.WalletExportService;
 import com.ifpr.backend.service.WalletService;
 import jakarta.validation.Valid;
 import java.util.List;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,14 +13,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/wallets")
 public class WalletController {
     private final WalletService service;
-    private final WalletExportService exportService;
 
     public WalletController(
-        WalletService service,
-        WalletExportService exportService
+        WalletService service
     ) {
         this.service = service;
-        this.exportService = exportService;
     }
 
     @GetMapping
@@ -54,18 +48,6 @@ public class WalletController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.delete(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/{id}/export")
-    public ResponseEntity<byte[]> export(@PathVariable Long id,
-        @RequestParam(defaultValue = "ALL") String type,
-        @RequestParam(defaultValue = "XLSX") String format
-    ) {
-        WalletExportService.ExportedWallet file = exportService.export(id, type, format);
-        return ResponseEntity.ok()
-            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + file.fileName() + "\"")
-            .contentType(MediaType.parseMediaType(file.contentType()))
-            .body(file.content());
     }
 
     @GetMapping("/{id}/members")

@@ -16,22 +16,6 @@
     background-color: #ffffff;
 }
 
-.export-controls {
-    display: grid;
-    grid-template-columns: 1fr 90px auto;
-    gap: .6rem;
-}
-
-.export-controls .simple-select {
-    min-width: 0;
-}
-
-.export-button {
-    white-space: nowrap;
-    padding-left: 1rem;
-    padding-right: 1rem;
-}
-
 .transactions-grid {
     grid-template-columns: minmax(280px, .8fr) minmax(0, 1.8fr);
 }
@@ -62,12 +46,6 @@
     }
 
     .transactions-grid {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 620px) {
-    .export-controls {
         grid-template-columns: 1fr;
     }
 }

@@ -40,19 +40,4 @@ export const transactionService = {
 
         return data;
     },
-
-    async export(walletId, type, format) {
-        const response = await api.get(
-            `/api/v1/wallets/${walletId}/export`,
-            {
-                params: {
-                    type,
-                    format,
-                },
-                responseType: "blob",
-            },
-        );
-
-        return response;
-    },
 };
