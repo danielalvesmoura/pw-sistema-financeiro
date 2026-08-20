@@ -9,7 +9,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -24,35 +24,30 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(
+        HttpServletRequest request,
+        HttpServletResponse response,
+        FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String header = request.getHeader("Authorization");
 
-        if (header == null || !header.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (header != null
+                && header.startsWith("Bearer ")
+                && SecurityContextHolder.getContext().getAuthentication() == null) {
+            try {
+                String email = jwtService.extractEmail(header.substring(7));
+                UserDetails user = userDetailsService.loadUserByUsername(email);
 
-        String token = header.substring(7);
+                var authentication = new UsernamePasswordAuthenticationToken(
+                    user, null, user.getAuthorities()
+                );
 
-        try {
-            String email = jwtService.extractEmail(token);
-
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-                if (jwtService.isTokenValid(token, userDetails)) {
-                    UsernamePasswordAuthenticationToken authentication =
-                            new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-
-                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-                    SecurityContextHolder.getContext().setAuthentication(authentication);
-                }
+                SecurityContextHolder.getContext().setAuthentication(authentication);
+            } catch (JwtException | IllegalArgumentException | UsernameNotFoundException ignored) {
+                // Token inválido: a requisição continua sem autenticação e será rejeitada
+                // pelo Spring Security caso tente acessar uma rota protegida.
             }
-        } catch (JwtException | IllegalArgumentException ignored) {
-            SecurityContextHolder.clearContext();
         }
 
         filterChain.doFilter(request, response);

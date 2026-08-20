@@ -150,7 +150,6 @@ public class TransactionService {
         transaction.setData(request.date());
         transaction.setAnexoUrl(blankToNull(request.attachmentUrl()));
         transaction.setObservacoes(blankToNull(request.notes()));
-        transaction.setRecorrente(Boolean.TRUE.equals(request.recurring()));
         transaction.setFormaPagamento(blankToNull(request.paymentMethod()));
 
         if (request.categoryId() == null) {
@@ -207,8 +206,8 @@ public class TransactionService {
                 ownCategory ? category.getId() : null,
                 category == null ? null : category.getNome(),
                 t.getCriadoPor().getId(), t.getCriadoPor().getNome(), t.getTipo(), t.getValor(),
-                t.getDescricao(), t.getData(), t.getAnexoUrl(), t.getObservacoes(), t.isRecorrente(),
-                t.getFormaPagamento(), t.getCriadoEm(), t.getAtualizadoEm());
+                t.getDescricao(), t.getData(), t.getAnexoUrl(), t.getObservacoes(), t.getFormaPagamento(),
+                t.getCriadoEm(), t.getAtualizadoEm());
     }
 
 

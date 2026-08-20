@@ -24,13 +24,6 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String senhaCriptografada;
 
-    // Atributos extras sugeridos no enunciado.
-    @Column(length = 30)
-    private String telefone;
-
-    @Column(length = 500)
-    private String fotoUrl;
-
     // Preferência simples do usuário.
     @Column(length = 3)
     private String moedaPadrao = "BRL";

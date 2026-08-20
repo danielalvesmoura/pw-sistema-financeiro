@@ -20,7 +20,6 @@ public final class TransactionDtos {
         Long categoryId,
         @Size(max = 500) String attachmentUrl,
         @Size(max = 1000) String notes,
-        Boolean recurring,
         @Size(max = 40) String paymentMethod
     ) {}
 
@@ -37,7 +36,6 @@ public final class TransactionDtos {
         LocalDate date,
         String attachmentUrl,
         String notes,
-        boolean recurring,
         String paymentMethod,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

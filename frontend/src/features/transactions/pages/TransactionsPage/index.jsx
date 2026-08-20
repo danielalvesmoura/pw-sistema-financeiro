@@ -14,7 +14,6 @@ const emptyForm = {
     date: today,
     categoryId: "",
     notes: "",
-    recurring: false,
     paymentMethod: "",
 };
 
@@ -135,7 +134,6 @@ export default function TransactionsPage() {
             date: form.date,
             categoryId: form.categoryId ? Number(form.categoryId) : null,
             notes: form.notes || null,
-            recurring: form.recurring,
             paymentMethod: form.paymentMethod || null,
             attachmentUrl: null,
         };
@@ -173,7 +171,6 @@ export default function TransactionsPage() {
             date: item.date,
             categoryId: item.categoryId ? String(item.categoryId) : "",
             notes: item.notes || "",
-            recurring: Boolean(item.recurring),
             paymentMethod: item.paymentMethod || "",
         });
 
@@ -446,20 +443,6 @@ export default function TransactionsPage() {
                                             })
                                         }
                                     />
-                                </label>
-
-                                <label className="checkbox-line">
-                                    <input
-                                        type="checkbox"
-                                        checked={form.recurring}
-                                        onChange={(event) =>
-                                            setForm({
-                                                ...form,
-                                                recurring: event.target.checked,
-                                            })
-                                        }
-                                    />
-                                    Transação recorrente
                                 </label>
 
                                 <div className="inline-actions">

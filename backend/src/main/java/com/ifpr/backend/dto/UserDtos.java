@@ -11,8 +11,6 @@ public final class UserDtos {
         Long id,
         String name,
         String email,
-        String phone,
-        String photoUrl,
         String defaultCurrency,
         boolean active,
         LocalDateTime lastAccessAt,
@@ -22,8 +20,6 @@ public final class UserDtos {
 
     public record UpdateUserRequest(
         @NotBlank @Size(min = 2, max = 100) String name,
-        @Size(max = 30) String phone,
-        @Size(max = 500) String photoUrl,
         @Size(min = 3, max = 3) String defaultCurrency
     ) {}
 

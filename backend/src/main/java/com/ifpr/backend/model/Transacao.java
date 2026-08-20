@@ -49,8 +49,6 @@ public class Transacao {
     @Column(length = 1000)
     private String observacoes;
 
-    private Boolean recorrente = false;
-
     // Extra simples para diferenciar dinheiro, cartão, PIX etc.
     @Column(length = 40)
     private String formaPagamento;
@@ -64,7 +62,6 @@ public class Transacao {
     void prePersist() {
         criadoEm = LocalDateTime.now();
         atualizadoEm = criadoEm;
-        if (recorrente == null) recorrente = false;
     }
 
     @PreUpdate
@@ -72,8 +69,4 @@ public class Transacao {
         atualizadoEm = LocalDateTime.now();
     }
 
-    // Mantido porque possui regra além de um getter simples.
-    public boolean isRecorrente() {
-        return Boolean.TRUE.equals(recorrente);
-    }
 }

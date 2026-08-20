@@ -32,8 +32,6 @@ public class UserService {
     public UserResponse update(UpdateUserRequest request) {
         Usuario usuario = currentUserService.get();
         usuario.setNome(request.name().trim());
-        usuario.setTelefone(blankToNull(request.phone()));
-        usuario.setFotoUrl(blankToNull(request.photoUrl()));
         if (request.defaultCurrency() != null && !request.defaultCurrency().isBlank()) {
             usuario.setMoedaPadrao(request.defaultCurrency().trim().toUpperCase());
         }
@@ -51,13 +49,8 @@ public class UserService {
         return new MessageResponse("Senha alterada com sucesso.");
     }
 
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
-    }
-
     private UserResponse toResponse(Usuario usuario) {
-        return new UserResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getTelefone(),
-                usuario.getFotoUrl(), usuario.getMoedaPadrao(), usuario.isAtivo(), usuario.getUltimoAcessoEm(),
-                usuario.getCriadoEm(), usuario.getAtualizadoEm());
+        return new UserResponse(usuario.getId(), usuario.getNome(), usuario.getEmail(), usuario.getMoedaPadrao(),
+                usuario.isAtivo(), usuario.getUltimoAcessoEm(), usuario.getCriadoEm(), usuario.getAtualizadoEm());
     }
 }
