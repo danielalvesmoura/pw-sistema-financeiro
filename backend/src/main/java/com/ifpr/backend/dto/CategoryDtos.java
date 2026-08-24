@@ -12,7 +12,6 @@ public final class CategoryDtos {
     public record CategoryRequest(
         @NotBlank @Size(max = 80) String name,
         @NotNull TipoTransacao type,
-        @Size(max = 80) String icon,
         @Size(max = 255) String description,
         @Min(0) Integer displayOrder,
         Boolean active
@@ -23,7 +22,6 @@ public final class CategoryDtos {
         Long walletId,
         String name,
         TipoTransacao type,
-        String icon,
         String description,
         int displayOrder,
         boolean active

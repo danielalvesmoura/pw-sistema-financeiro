@@ -16,8 +16,7 @@ public final class WalletDtos {
         @NotBlank @Size(max = 100) String name,
         @Size(max = 255) String description,
         @Size(min = 3, max = 3) String currency,
-        @DecimalMin("0.00") BigDecimal initialBalance,
-        Boolean archived
+        @DecimalMin("0.00") BigDecimal initialBalance
     ) {}
 
     public record WalletResponse(
@@ -26,7 +25,6 @@ public final class WalletDtos {
         String description,
         String currency,
         BigDecimal initialBalance,
-        boolean archived,
         Long ownerId,
         String ownerName,
         PapelCarteira role,
@@ -50,7 +48,6 @@ public final class WalletDtos {
         PapelCarteira role,
         LocalDateTime joinedAt,
         boolean pendingInvite,
-        LocalDateTime inviteExpiresAt,
-        boolean active
+        LocalDateTime inviteExpiresAt
     ) {}
 }

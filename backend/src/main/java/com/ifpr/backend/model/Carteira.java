@@ -32,8 +32,6 @@ public class Carteira {
     @Column(precision = 15, scale = 2)
     private BigDecimal saldoInicial = BigDecimal.ZERO;
 
-    private Boolean arquivada = false;
-
     @Column(nullable = false)
     private LocalDateTime criadoEm;
 
@@ -50,8 +48,6 @@ public class Carteira {
         if (saldoInicial == null) 
             saldoInicial = BigDecimal.ZERO;
         
-        if (arquivada == null) 
-            arquivada = false;
     }
 
     @PreUpdate
@@ -65,9 +61,5 @@ public class Carteira {
 
     public BigDecimal getSaldoInicial() {
         return saldoInicial == null ? BigDecimal.ZERO : saldoInicial;
-    }
-
-    public boolean isArquivada() {
-        return Boolean.TRUE.equals(arquivada);
     }
 }

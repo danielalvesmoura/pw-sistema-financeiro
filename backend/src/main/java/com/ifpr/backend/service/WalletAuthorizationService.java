@@ -25,8 +25,8 @@ public class WalletAuthorizationService {
         CarteiraMembro member = membroRepository.findByCarteiraIdAndUsuarioId(walletId, userId)
                 .orElseThrow(() -> new AccessDeniedException("Você não faz parte desta carteira."));
 
-        if (!member.isAtivo() || member.isConvitePendente()) {
-            throw new AccessDeniedException("Seu acesso a esta carteira não está ativo.");
+        if (member.isConvitePendente()) {
+            throw new AccessDeniedException("Seu acesso a esta carteira ainda não foi aceito.");
         }
 
         return member;

@@ -27,8 +27,6 @@ public class Usuario {
     @Column(length = 3)
     private String moedaPadrao = "BRL";
 
-    private Boolean ativo = true;
-
     private LocalDateTime ultimoAcessoEm;
 
     @Column(nullable = false)
@@ -44,9 +42,6 @@ public class Usuario {
 
         if (moedaPadrao == null || moedaPadrao.isBlank()) 
             moedaPadrao = "BRL";
-
-        if (ativo == null) 
-            ativo = true;
     }
 
     @PreUpdate
@@ -58,7 +53,4 @@ public class Usuario {
         return moedaPadrao == null || moedaPadrao.isBlank() ? "BRL" : moedaPadrao;
     }
 
-    public boolean isAtivo() {
-        return ativo == null || ativo;
-    }
 }

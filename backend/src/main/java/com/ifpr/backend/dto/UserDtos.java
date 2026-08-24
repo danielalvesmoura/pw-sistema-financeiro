@@ -12,7 +12,6 @@ public final class UserDtos {
         String name,
         String email,
         String defaultCurrency,
-        boolean active,
         LocalDateTime lastAccessAt,
         LocalDateTime createdAt,
         LocalDateTime updatedAt

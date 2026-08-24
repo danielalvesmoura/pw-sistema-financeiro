@@ -67,18 +67,11 @@ export default function DashboardPage() {
                 setSummary(summaryData);
                 setRecent(page.content || []);
             })
-        .catch((err) =>
-                setError(
-                    err?.response?.data?.message ||
-                        "Erro ao carregar dashboard.",
-                ),
-            )
+        .catch((err) => setError(err?.response?.data?.message || "Erro ao carregar dashboard.",),)
         .finally(() => setLoading(false));
     }, [walletId]);
 
-    const selectedWallet = wallets.find(
-        (wallet) => String(wallet.id) === String(walletId),
-    );
+    const selectedWallet = wallets.find((wallet) => String(wallet.id) === String(walletId),);
 
     const currency = selectedWallet?.currency || "BRL";
 
@@ -96,9 +89,7 @@ export default function DashboardPage() {
                     <select
                         className="simple-select wallet-select"
                         value={walletId}
-                        onChange={(event) =>
-                            setWalletId(event.target.value)
-                        }
+                        onChange={(event) => setWalletId(event.target.value)}
                     >
                         {wallets.map((wallet) => (
                             <option value={wallet.id} key={wallet.id}>
@@ -189,15 +180,10 @@ export default function DashboardPage() {
                             ) : (
                                 <div className="recent-list">
                                     {recent.map((item) => (
-                                        <div
-                                            className="recent-item"
-                                            key={item.id}
-                                        >
+                                        <div className="recent-item" key={item.id}>
                                             <div>
                                                 <strong>
-                                                    {item.description ||
-                                                        item.categoryName ||
-                                                        "Sem descrição"}
+                                                    {item.description || item.categoryName || "Sem descrição"}
                                                 </strong>
                                                 <small>
                                                     {formatDate(item.date)}
@@ -211,9 +197,7 @@ export default function DashboardPage() {
                                                         : "value-expense"
                                                 }
                                             >
-                                                {item.type === "INCOME"
-                                                    ? "+"
-                                                    : "-"}
+                                                {item.type === "INCOME" ? "+" : "-"}
                                                 {money(item.amount, currency)}
                                             </span>
                                         </div>

@@ -78,10 +78,7 @@ const RegisterPage = () => {
         );
     };
 
-    const passwordStrength =
-        passwordInputValue.length > 0
-            ? calculatePasswordStrength(passwordInputValue)
-            : null;
+    const passwordStrength = passwordInputValue.length > 0 ? calculatePasswordStrength(passwordInputValue) : null;
 
     const handleSubmit = async (e) => {
         e.preventDefault();

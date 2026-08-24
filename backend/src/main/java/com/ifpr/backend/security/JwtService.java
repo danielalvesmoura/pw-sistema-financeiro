@@ -38,7 +38,7 @@ public class JwtService {
         return Jwts.parser()
             .verifyWith(key)
             .build()
-            .parseSignedClaims(token)
+        .parseSignedClaims(token)
             .getPayload()
             .get("email", String.class);
     }

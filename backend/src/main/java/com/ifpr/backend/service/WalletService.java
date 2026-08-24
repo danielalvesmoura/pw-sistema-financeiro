@@ -45,7 +45,6 @@ public class WalletService {
         Usuario user = currentUserService.get();
 
         return membroRepository.findByUsuarioIdOrderByEntradoEmAsc(user.getId()).stream()
-            .filter(CarteiraMembro::isAtivo)
             .map(member -> toResponse(member.getCarteira(), member.getPapel()))
             .toList();
     }
@@ -67,7 +66,6 @@ public class WalletService {
         member.setUsuario(user);
         member.setPapel(PapelCarteira.OWNER);
         member.setConvitePendente(false);
-        member.setAtivo(true);
 
         member = membroRepository.save(member);
 
@@ -137,7 +135,6 @@ public class WalletService {
         member.setUsuario(user);
         member.setPapel(request.role());
         member.setConvitePendente(false);
-        member.setAtivo(true);
 
         return toMemberResponse(membroRepository.save(member));
     }
@@ -187,12 +184,6 @@ public class WalletService {
         } else if (creating) {
             wallet.setSaldoInicial(BigDecimal.ZERO);
         }
-
-        if (request.archived() != null) {
-            wallet.setArquivada(request.archived());
-        } else if (creating) {
-            wallet.setArquivada(false);
-        }
     }
 
     private String blankToNull(String value) {
@@ -206,7 +197,6 @@ public class WalletService {
             wallet.getDescricao(),
             wallet.getMoeda(),
             wallet.getSaldoInicial(),
-            wallet.isArquivada(),
             wallet.getDono().getId(),
             wallet.getDono().getNome(),
             role,
@@ -219,13 +209,13 @@ public class WalletService {
         Usuario user = member.getUsuario();
         
         return new MemberResponse(
-                user.getId(),
-                user.getNome(),
-                user.getEmail(),
-                member.getPapel(),
-                member.getEntradoEm(),
-                member.isConvitePendente(),
-                member.getConviteExpiraEm(),
-                member.isAtivo());
+            user.getId(),
+            user.getNome(),
+            user.getEmail(),
+            member.getPapel(),
+            member.getEntradoEm(),
+            member.isConvitePendente(),
+            member.getConviteExpiraEm()
+        );
     }
 }

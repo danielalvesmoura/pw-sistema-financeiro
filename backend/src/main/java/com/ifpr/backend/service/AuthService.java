@@ -55,7 +55,6 @@ public class AuthService {
         usuario.setEmail(email);
         usuario.setSenhaCriptografada(passwordEncoder.encode(request.password()));
         usuario.setMoedaPadrao("BRL");
-        usuario.setAtivo(true);
 
         usuario = usuarioRepository.save(usuario);
         
@@ -77,10 +76,6 @@ public class AuthService {
 
         Usuario usuario = usuarioRepository.findByEmailIgnoreCase(request.email())
                 .orElseThrow(() -> new UnauthorizedException("E-mail ou senha inválidos."));
-                
-        if (!usuario.isAtivo()) {
-            throw new UnauthorizedException("Usuário inativo.");
-        }
 
         usuario.setUltimoAcessoEm(LocalDateTime.now());
 

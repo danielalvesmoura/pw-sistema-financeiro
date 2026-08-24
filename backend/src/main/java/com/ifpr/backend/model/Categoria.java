@@ -28,9 +28,6 @@ public class Categoria {
     @Column(nullable = false, length = 20)
     private TipoTransacao tipo;
 
-    @Column(length = 80)
-    private String icone;
-
     private Integer ordemExibicao = 0;
 
     private Boolean ativo = true;

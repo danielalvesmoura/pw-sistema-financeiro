@@ -62,7 +62,6 @@ public class UserService {
             usuario.getNome(), 
             usuario.getEmail(), 
             usuario.getMoedaPadrao(),
-            usuario.isAtivo(), 
             usuario.getUltimoAcessoEm(), 
             usuario.getCriadoEm(), 
             usuario.getAtualizadoEm()

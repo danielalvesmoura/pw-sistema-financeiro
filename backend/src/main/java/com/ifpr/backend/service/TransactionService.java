@@ -42,7 +42,8 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public Page<TransactionResponse> list(Long walletId, TipoTransacao type, Long categoryId,
-        LocalDate startDate, LocalDate endDate, Pageable pageable) {
+    LocalDate startDate, LocalDate endDate, Pageable pageable) {
+
         auth.requireMember(walletId);
 
         Long currentUserId = currentUserService.get().getId();
@@ -72,8 +73,7 @@ public class TransactionService {
             return cb.and(predicates.toArray(Predicate[]::new));
         };
         
-        return transacaoRepository.findAll(spec, pageable)
-                .map(t -> toResponse(t, currentUserId));
+        return transacaoRepository.findAll(spec, pageable).map(t -> toResponse(t, currentUserId));
     }
 
     @Transactional(readOnly = true)
@@ -238,19 +238,28 @@ public class TransactionService {
         Categoria category = t.getCategoria();
         boolean ownCategory = isCategoryOwnedBy(category, currentUserId);
 
-        return new TransactionResponse(t.getId(), t.getCarteira().getId(),
+        return new TransactionResponse(
+            t.getId(), 
+            t.getCarteira().getId(),
             ownCategory ? category.getId() : null,
             category == null ? null : category.getNome(),
-            t.getCriadoPor().getId(), t.getCriadoPor().getNome(), t.getTipo(), t.getValor(),
-            t.getDescricao(), t.getData(), t.getAnexoUrl(), t.getObservacoes(), t.getFormaPagamento(),
-            t.getCriadoEm(), t.getAtualizadoEm());
+            t.getCriadoPor().getId(), 
+            t.getCriadoPor().getNome(), 
+            t.getTipo(), 
+            t.getValor(),
+            t.getDescricao(), 
+            t.getData(), 
+            t.getAnexoUrl(), 
+            t.getObservacoes(), 
+            t.getFormaPagamento(),
+            t.getCriadoEm(), 
+            t.getAtualizadoEm()
+        );
     }
 
 
     private boolean isCategoryOwnedBy(Categoria category, Long userId) {
-        return category != null
-        && category.getUsuario() != null
-        && category.getUsuario().getId().equals(userId);
+        return category != null && category.getUsuario() != null && category.getUsuario().getId().equals(userId);
     }
 
     private static class CategoryTotalAccumulator {

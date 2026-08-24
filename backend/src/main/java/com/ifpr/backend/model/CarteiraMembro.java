@@ -34,20 +34,13 @@ public class CarteiraMembro {
 
     private LocalDateTime conviteExpiraEm;
 
-    private Boolean ativo = true;
-
     @PrePersist
     void prePersist() {
         entradoEm = LocalDateTime.now();
         if (convitePendente == null) convitePendente = false;
-        if (ativo == null) ativo = true;
     }
 
     public boolean isConvitePendente() {
         return Boolean.TRUE.equals(convitePendente);
-    }
-
-    public boolean isAtivo() {
-        return ativo == null || ativo;
     }
 }

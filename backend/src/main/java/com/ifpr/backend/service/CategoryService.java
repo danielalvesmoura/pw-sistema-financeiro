@@ -115,7 +115,6 @@ public class CategoryService {
             copy.setUsuario(currentUser);
             copy.setNome(old.getNome());
             copy.setTipo(old.getTipo());
-            copy.setIcone(old.getIcone());
             copy.setDescricao(old.getDescricao());
             copy.setOrdemExibicao(old.getOrdemExibicao());
             copy.setAtivo(old.isAtivo());
@@ -137,10 +136,6 @@ public class CategoryService {
 
         categoria.setTipo(
             request.type()
-        );
-
-        categoria.setIcone(
-            blankToNull(request.icon())
         );
 
         categoria.setDescricao(
@@ -167,7 +162,6 @@ public class CategoryService {
             c.getCarteira() == null ? null : c.getCarteira().getId(),
             c.getNome(), 
             c.getTipo(), 
-            c.getIcone(), 
             c.getDescricao(), 
             c.getOrdemExibicao(), 
             c.isAtivo()

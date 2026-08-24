@@ -6,7 +6,6 @@ import "./styles.css";
 const emptyForm = {
     name: "",
     type: "EXPENSE",
-    icon: "",
     description: "",
     displayOrder: 0,
     active: true,
@@ -81,7 +80,6 @@ export default function CategoriesPage() {
             const payload = {
                 ...form,
                 displayOrder: Number(form.displayOrder || 0),
-                icon: form.icon || null,
                 description: form.description || null,
             };
 
@@ -109,7 +107,6 @@ export default function CategoriesPage() {
         setForm({
             name: item.name,
             type: item.type,
-            icon: item.icon || "",
             description: item.description || "",
             displayOrder: item.displayOrder || 0,
             active: item.active !== false,
@@ -233,20 +230,6 @@ export default function CategoriesPage() {
                                     />
                                 </label>
 
-                                <label>
-                                    Ícone
-                                    <input
-                                        maxLength={80}
-                                        value={form.icon}
-                                        onChange={(event) =>
-                                            setForm({
-                                                ...form,
-                                                icon: event.target.value,
-                                            })
-                                        }
-                                        placeholder="Opcional"
-                                    />
-                                </label>
 
                                 <label>
                                     Ordem de exibição
