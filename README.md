@@ -57,7 +57,7 @@ Inicie o MySQL no XAMPP ou em outra instalação local.
 
 Na pasta `backend`:
 
-.\mvnw.cmd spring-boot:run
+mvn spring-boot:run
 
 API: `http://localhost:8080`
 
