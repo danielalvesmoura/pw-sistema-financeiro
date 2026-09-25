@@ -11,6 +11,7 @@ import {
 import { Link } from "react-router-dom";
 import { walletService } from "../../../../services/WalletService";
 import { transactionService } from "../../../transactions/services/transactions.service";
+import { realtimeService } from "../../../../services/RealtimeService";
 import { formatDate } from "../../../../shared/utils/date";
 import "./styles.css";
 
@@ -54,21 +55,57 @@ export default function DashboardPage() {
             return;
         }
 
-        setLoading(true);
+        let active = true;
 
-        Promise.all([
-            transactionService.summary(walletId),
-            transactionService.list(walletId, {
-                page: 0,
-                size: 5,
-                sort: "date,desc",
-            }),
-        ]).then(([summaryData, page]) => {
-                setSummary(summaryData);
-                setRecent(page.content || []);
-            })
-        .catch((err) => setError(err?.response?.data?.message || "Erro ao carregar dashboard.",),)
-        .finally(() => setLoading(false));
+        const refreshDashboard = async (showLoading = false) => {
+            if (showLoading) {
+                setLoading(true);
+            }
+
+            try {
+                const [summaryData, page] = await Promise.all([
+                    transactionService.summary(walletId),
+                    transactionService.list(walletId, {
+                        page: 0,
+                        size: 5,
+                        sort: "date,desc",
+                    }),
+                ]);
+
+                if (active) {
+                    setSummary(summaryData);
+                    setRecent(page.content || []);
+                }
+            } catch (err) {
+                if (active) {
+                    setError(
+                        err?.response?.data?.message ||
+                            "Erro ao carregar dashboard.",
+                    );
+                }
+            } finally {
+                if (active && showLoading) {
+                    setLoading(false);
+                }
+            }
+        };
+
+        refreshDashboard(true);
+
+        const unsubscribe = realtimeService.subscribeToWallet(
+            walletId,
+            (event) => {
+                if (event.type?.startsWith("TRANSACTION_")) {
+                    refreshDashboard();
+                }
+            },
+            (err) => console.warn("Tempo real do dashboard desconectado.", err),
+        );
+
+        return () => {
+            active = false;
+            unsubscribe();
+        };
     }, [walletId]);
 
     const selectedWallet = wallets.find((wallet) => String(wallet.id) === String(walletId),);
