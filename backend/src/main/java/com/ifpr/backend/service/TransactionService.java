@@ -6,12 +6,15 @@ import static com.ifpr.backend.dto.TransactionDtos.*;
 import com.ifpr.backend.exception.BusinessException;
 import com.ifpr.backend.exception.ResourceNotFoundException;
 import com.ifpr.backend.model.*;
+import com.ifpr.backend.realtime.TransactionChangedEvent;
+import com.ifpr.backend.realtime.WalletRealtimeEvent;
 import com.ifpr.backend.repository.*;
 import jakarta.persistence.criteria.Predicate;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,19 +28,22 @@ public class TransactionService {
     private final CategoriaRepository categoriaRepository;
     private final CurrentUserService currentUserService;
     private final WalletAuthorizationService auth;
+    private final ApplicationEventPublisher eventPublisher;
 
     public TransactionService(
         TransacaoRepository transacaoRepository,
         CarteiraRepository carteiraRepository,
         CategoriaRepository categoriaRepository,
         CurrentUserService currentUserService,
-        WalletAuthorizationService auth
+        WalletAuthorizationService auth,
+        ApplicationEventPublisher eventPublisher
     ) {
         this.transacaoRepository = transacaoRepository;
         this.carteiraRepository = carteiraRepository;
         this.categoriaRepository = categoriaRepository;
         this.currentUserService = currentUserService;
         this.auth = auth;
+        this.eventPublisher = eventPublisher;
     }
 
     @Transactional(readOnly = true)
@@ -100,7 +106,10 @@ public class TransactionService {
 
         apply(transaction, request, currentUser.getId());
 
-        return toResponse(transacaoRepository.save(transaction), currentUser.getId());
+        Transacao saved = transacaoRepository.save(transaction);
+        publishChange(WalletRealtimeEvent.Type.TRANSACTION_CREATED, walletId, saved.getId());
+
+        return toResponse(saved, currentUser.getId());
     }
 
     @Transactional
@@ -112,7 +121,10 @@ public class TransactionService {
 
         apply(transaction, request, currentUserId);
 
-        return toResponse(transacaoRepository.save(transaction), currentUserId);
+        Transacao saved = transacaoRepository.save(transaction);
+        publishChange(WalletRealtimeEvent.Type.TRANSACTION_UPDATED, walletId, saved.getId());
+
+        return toResponse(saved, currentUserId);
     }
 
     @Transactional
@@ -120,6 +132,7 @@ public class TransactionService {
         auth.requireEditor(walletId);
 
         transacaoRepository.delete(findInWallet(walletId, id));
+        publishChange(WalletRealtimeEvent.Type.TRANSACTION_DELETED, walletId, id);
     }
 
     @Transactional(readOnly = true)
@@ -177,6 +190,10 @@ public class TransactionService {
         BigDecimal balance = wallet.getSaldoInicial().add(income).subtract(expense);
 
         return new SummaryResponse(income, expense, balance, items.size(), byCategory, byMonth);
+    }
+
+    private void publishChange(WalletRealtimeEvent.Type type, Long walletId, Long transactionId) {
+        eventPublisher.publishEvent(new TransactionChangedEvent(type, walletId, transactionId));
     }
 
     private void apply(Transacao transaction, TransactionRequest request, Long currentUserId) {
