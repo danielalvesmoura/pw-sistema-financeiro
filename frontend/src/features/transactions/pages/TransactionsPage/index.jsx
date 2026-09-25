@@ -1,7 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { walletService } from "../../../../services/WalletService";
 import { categoryService } from "../../../../services/CategoryService";
 import { transactionService } from "../../services/transactions.service";
+import { realtimeService } from "../../../../services/RealtimeService";
 import { formatDate } from "../../../../shared/utils/date";
 import "./styles.css";
 
@@ -49,7 +50,7 @@ export default function TransactionsPage() {
         [categories, form.type],
     );
 
-    const loadTransactions = async (id = walletId) => {
+    const loadTransactions = useCallback(async (id) => {
         if (!id) {
             setItems([]);
             return;
@@ -73,7 +74,7 @@ export default function TransactionsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         walletService
@@ -112,7 +113,21 @@ export default function TransactionsPage() {
 
         setEditingId(null);
         setForm(emptyForm);
-    }, [walletId]);
+
+        if (!walletId) {
+            return undefined;
+        }
+
+        return realtimeService.subscribeToWallet(
+            walletId,
+            (event) => {
+                if (event.type?.startsWith("TRANSACTION_")) {
+                    loadTransactions(walletId);
+                }
+            },
+            (err) => console.warn("Tempo real das transações desconectado.", err),
+        );
+    }, [walletId, loadTransactions]);
 
     const submit = async (event) => {
         event.preventDefault();
@@ -149,7 +164,7 @@ export default function TransactionsPage() {
             setForm(emptyForm);
             setEditingId(null);
             setMessage("Transação salva.");
-            await loadTransactions();
+            await loadTransactions(walletId);
         } catch (err) {
             setError(
                 err?.response?.data?.message ||
@@ -185,7 +200,7 @@ export default function TransactionsPage() {
         try {
             await transactionService.remove(walletId, id);
             setMessage("Transação excluída.");
-            await loadTransactions();
+            await loadTransactions(walletId);
         } catch (err) {
             setError(
                 err?.response?.data?.message ||
