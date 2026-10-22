@@ -30,6 +30,7 @@ export default function AppLayout() {
                     <NavLink to="/app/transacoes">Transações</NavLink>
                     <NavLink to="/app/categorias">Categorias</NavLink>
                     <NavLink to="/app/carteiras">Carteiras</NavLink>
+                    <NavLink to="/app/insights">Análise com IA</NavLink>
                     <NavLink to="/app/perfil/senha">Alterar senha</NavLink>
                 </nav>
                 <div className="sidebar-user">

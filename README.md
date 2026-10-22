@@ -91,3 +91,42 @@ Com o backend em execução:
 Backend: Java 21, Spring Boot, Spring Security, JWT, Spring Data JPA/Hibernate, MySQL, Maven e SpringDoc/Swagger.
 
 Frontend: React, Axios, React Router e Recharts.
+
+## Integração com IA
+
+O sistema possui uma funcionalidade de **análise financeira com IA** usando a API Gemini. Na tela **Análise com IA**, o usuário escolhe uma carteira e um período. O backend resume dados reais das transações (receitas, despesas, resultado e maiores categorias de gasto) e envia somente esse contexto agregado para o Gemini, que devolve um diagnóstico, pontos de atenção e ações práticas.
+
+A chave da API fica somente no backend e **não deve ser adicionada ao repositório**.
+
+### Configurar a API Gemini
+
+1. Crie uma chave no Google AI Studio.
+2. Defina a variável de ambiente `GEMINI_API_KEY` antes de iniciar o backend.
+3. Opcionalmente, defina `GEMINI_MODEL`. O padrão do projeto é `gemini-3.8-flash`.
+
+PowerShell:
+
+```powershell
+$env:GEMINI_API_KEY="sua-chave-aqui"
+$env:GEMINI_MODEL="gemini-3.8-flash"
+cd backend
+.\mvnw.cmd spring-boot:run
+```
+
+Linux/macOS:
+
+```bash
+export GEMINI_API_KEY="sua-chave-aqui"
+export GEMINI_MODEL="gemini-3.8-flash"
+cd backend
+./mvnw spring-boot:run
+```
+
+Variáveis relacionadas à IA:
+
+| Variável | Descrição | Padrão |
+|---|---|---|
+| `GEMINI_API_KEY` | Chave usada pelo backend para autenticar na API Gemini | sem valor; obrigatória para gerar análises |
+| `GEMINI_MODEL` | Modelo Gemini usado para gerar os insights | `gemini-3.8-flash` |
+
+A API key nunca é enviada ao navegador. O frontend chama apenas o endpoint autenticado do próprio backend: `POST /api/v1/wallets/{walletId}/ai/insights`.

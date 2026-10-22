@@ -1,0 +1,139 @@
+.ai-page {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.ai-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.ai-filter-card {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.4fr) repeat(2, minmax(150px, 1fr)) auto;
+    gap: 1rem;
+    align-items: end;
+}
+
+.ai-filter-card label {
+    display: grid;
+    gap: .45rem;
+    color: #40484c;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+.ai-filter-card select,
+.ai-filter-card input {
+    width: 100%;
+    border: 1px solid #c8d0d4;
+    border-radius: .65rem;
+    background: #ffffff;
+    padding: .8rem .9rem;
+    color: #243238;
+}
+
+.ai-filter-card button {
+    border: 0;
+    border-radius: .65rem;
+    padding: .85rem 1.1rem;
+    background: #003345;
+    color: #ffffff;
+    font-weight: 700;
+    cursor: pointer;
+    min-height: 44px;
+}
+
+.ai-filter-card button:disabled {
+    opacity: .65;
+    cursor: wait;
+}
+
+.ai-results {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.ai-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.ai-metric {
+    display: grid;
+    gap: .45rem;
+}
+
+.ai-metric span {
+    color: #6a777e;
+    font-size: .9rem;
+}
+
+.ai-metric strong {
+    color: #003345;
+    font-size: 1.25rem;
+}
+
+.ai-insight-card {
+    display: grid;
+    gap: 1.25rem;
+}
+
+.ai-insight-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.ai-insight-title h2 {
+    margin: 0 0 .3rem;
+    color: #003345;
+}
+
+.ai-insight-title small {
+    color: #6a777e;
+}
+
+.ai-badge {
+    border-radius: 999px;
+    background: #e7eef0;
+    color: #003345;
+    padding: .35rem .65rem;
+    font-size: .75rem;
+    font-weight: 800;
+}
+
+.ai-insight-text {
+    white-space: pre-wrap;
+    line-height: 1.65;
+    color: #243238;
+}
+
+.ai-disclaimer {
+    margin: 0;
+    padding-top: 1rem;
+    border-top: 1px solid #e3e7e9;
+    color: #6a777e;
+    font-size: .85rem;
+}
+
+@media (max-width: 980px) {
+    .ai-filter-card {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .ai-summary-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 620px) {
+    .ai-filter-card,
+    .ai-summary-grid {
+        grid-template-columns: 1fr;
+    }
+}
