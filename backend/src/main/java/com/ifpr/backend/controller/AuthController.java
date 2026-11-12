@@ -2,6 +2,7 @@ package com.ifpr.backend.controller;
 
 import static com.ifpr.backend.dto.AuthDtos.*;
 
+import com.ifpr.backend.security.AuthRateLimitService;
 import com.ifpr.backend.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -13,8 +14,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService service;
-    public AuthController(AuthService service) {
+    private final AuthRateLimitService rateLimitService;
+
+    public AuthController(
+        AuthService service,
+        AuthRateLimitService rateLimitService
+    ) {
         this.service = service;
+        this.rateLimitService = rateLimitService;
     }
 
     @PostMapping("/register")
@@ -23,15 +30,31 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@Valid @RequestBody LoginRequest request) {
-        return service.login(request);
+    public LoginResponse login(
+        @Valid @RequestBody LoginRequest request,
+        HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+
+        rateLimitService.checkLogin(ipAddress, request.email());
+
+        LoginResponse response = service.login(request);
+
+        rateLimitService.loginSucceeded(ipAddress, request.email());
+
+        return response;
     }
 
     @PostMapping("/forgot-password")
     public ForgotPasswordResponse forgot(
-            @Valid @RequestBody ForgotPasswordRequest request,
-            HttpServletRequest httpRequest) {
-        return service.forgotPassword(request, httpRequest.getRemoteAddr());
+        @Valid @RequestBody ForgotPasswordRequest request,
+        HttpServletRequest httpRequest
+    ) {
+        String ipAddress = httpRequest.getRemoteAddr();
+
+        rateLimitService.checkPasswordRecovery(ipAddress, request.email());
+
+        return service.forgotPassword(request, ipAddress);
     }
 
     @PostMapping("/reset-password")

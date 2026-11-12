@@ -2,6 +2,7 @@ package com.ifpr.backend.exception;
 
 import java.time.LocalDateTime;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -37,6 +38,18 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
+    @ExceptionHandler(TooManyRequestsException.class)
+    public ResponseEntity<ApiError> tooManyRequests(TooManyRequestsException ex) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+            .header(HttpHeaders.RETRY_AFTER, Long.toString(ex.getRetryAfterSeconds()))
+            .body(new ApiError(
+                LocalDateTime.now(),
+                HttpStatus.TOO_MANY_REQUESTS.value(),
+                HttpStatus.TOO_MANY_REQUESTS.getReasonPhrase(),
+                ex.getMessage()
+            ));
+    }
+
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> forbidden(AccessDeniedException ex) {
         return build(HttpStatus.FORBIDDEN, ex.getMessage() == null ? "Acesso negado" : ex.getMessage());
@@ -65,9 +78,9 @@ public class GlobalExceptionHandler {
     private ResponseEntity<ApiError> build(HttpStatus status, String message) {
         return ResponseEntity.status(status).body(
             new ApiError(
-                LocalDateTime.now(), 
-                status.value(), 
-                status.getReasonPhrase(), 
+                LocalDateTime.now(),
+                status.value(),
+                status.getReasonPhrase(),
                 message
             )
         );
