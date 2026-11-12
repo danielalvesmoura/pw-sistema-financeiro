@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class JwtService {
+    private static final int MIN_SECRET_BYTES = 32;
+
     private final SecretKey key;
     private final long expirationMs;
 
@@ -18,7 +20,21 @@ public class JwtService {
         @Value("${jwt.secret}") String secret,
         @Value("${jwt.expiration}") long expirationMs
     ) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        if (secret == null || secret.isBlank()) {
+            throw new IllegalStateException("JWT_SECRET deve ser configurado no ambiente.");
+        }
+
+        byte[] secretBytes = secret.getBytes(StandardCharsets.UTF_8);
+
+        if (secretBytes.length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException("JWT_SECRET deve possuir pelo menos 32 bytes.");
+        }
+
+        if (expirationMs <= 0) {
+            throw new IllegalStateException("JWT_EXPIRATION deve ser maior que zero.");
+        }
+
+        this.key = Keys.hmacShaKeyFor(secretBytes);
         this.expirationMs = expirationMs;
     }
 
@@ -38,7 +54,7 @@ public class JwtService {
         return Jwts.parser()
             .verifyWith(key)
             .build()
-        .parseSignedClaims(token)
+            .parseSignedClaims(token)
             .getPayload()
             .get("email", String.class);
     }
