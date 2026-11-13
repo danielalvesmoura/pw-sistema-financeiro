@@ -44,8 +44,46 @@ As configurações ficam em `backend/src/main/resources/application.properties`.
 | `DB_URL` | URL de conexão com o banco | `jdbc:mysql://localhost:3306/financeiro...` |
 | `DB_USERNAME` | Usuário do banco | `root` |
 | `DB_PASSWORD` | Senha do banco | vazia |
-| `JWT_SECRET` | Chave para assinatura do JWT (mín. 256 bits) | definida em `application.properties` |
+| `JWT_SECRET` | Chave para assinatura do JWT, com pelo menos 32 caracteres | **sem padrão; obrigatória** |
 | `JWT_EXPIRATION` | Expiração do token em ms | `86400000` (24h) |
+| `APP_CORS_ALLOWED_ORIGINS` | Origens autorizadas, separadas por vírgula | `http://localhost:3000,http://localhost:3001` |
+| `EXPOSE_RESET_TOKEN` | Expõe o token de recuperação apenas para teste local | `false` |
+
+
+## Segurança
+
+O projeto aplica controles alinhados ao OWASP nos pontos mais relevantes para este sistema financeiro:
+
+- **Segredos fora do código:** `JWT_SECRET`, credenciais de banco e chave do Gemini são lidos por variáveis de ambiente. O segredo JWT não possui valor padrão.
+- **Autenticação e senhas:** senhas são armazenadas com BCrypt, o JWT é validado em todas as rotas `/api/**` e senhas novas precisam conter maiúscula, minúscula e número.
+- **Rate limiting:** login e recuperação de senha possuem limite de tentativas por IP e identidade. Quando o limite é atingido, a API responde `429 Too Many Requests` com o header `Retry-After`.
+- **Controle de acesso:** operações de carteira continuam separadas entre `OWNER`, `EDITOR` e `VIEWER`, e convites pendentes não aparecem como carteiras acessíveis.
+- **Validação e sanitização:** DTOs limitam tamanho, formato e valores; textos persistidos são normalizados e têm tags HTML removidas; URLs de anexo aceitam apenas `http` e `https`.
+- **Consultas:** o backend utiliza Spring Data JPA/Hibernate, sem concatenação manual de SQL, e a paginação de transações limita tamanho e campos permitidos para ordenação.
+- **Headers HTTP:** a API envia políticas como CSP, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy` e HSTS quando acessada por HTTPS.
+- **CORS:** as origens permitidas são configuráveis por ambiente e o wildcard `*` não é aceito com credenciais.
+- **CSRF:** permanece desabilitado porque a API é stateless e o JWT é enviado no header `Authorization`, não em cookie de sessão.
+- **Recuperação de senha:** o token não é retornado pela API por padrão. Para testar localmente o fluxo existente, use `EXPOSE_RESET_TOKEN=true`; não habilite essa opção em produção.
+
+Exemplo no PowerShell antes de iniciar o backend:
+
+```powershell
+$env:JWT_SECRET="troque-por-uma-chave-longa-com-pelo-menos-32-caracteres"
+$env:APP_CORS_ALLOWED_ORIGINS="http://localhost:3000"
+cd backend
+.\mvnw.cmd spring-boot:run
+```
+
+Exemplo no Linux/macOS:
+
+```bash
+export JWT_SECRET="troque-por-uma-chave-longa-com-pelo-menos-32-caracteres"
+export APP_CORS_ALLOWED_ORIGINS="http://localhost:3000"
+cd backend
+./mvnw spring-boot:run
+```
+
+O arquivo `backend/.env.example` serve apenas como referência e não contém credenciais reais. O arquivo `.env` permanece ignorado pelo Git.
 
 ## Como executar
 
