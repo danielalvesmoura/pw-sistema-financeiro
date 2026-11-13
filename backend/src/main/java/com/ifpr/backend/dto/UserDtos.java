@@ -1,10 +1,14 @@
 package com.ifpr.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 public final class UserDtos {
+    private static final String STRONG_PASSWORD =
+        "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).+$";
+
     private UserDtos() {}
 
     public record UserResponse(
@@ -19,11 +23,18 @@ public final class UserDtos {
 
     public record UpdateUserRequest(
         @NotBlank @Size(min = 2, max = 100) String name,
-        @Size(min = 3, max = 3) String defaultCurrency
+        @Pattern(regexp = "^[A-Za-z]{3}$", message = "deve possuir 3 letras")
+        String defaultCurrency
     ) {}
 
     public record ChangePasswordRequest(
-        @NotBlank String currentPassword,
-        @NotBlank @Size(min = 8, max = 100) String newPassword
+        @NotBlank @Size(max = 100) String currentPassword,
+        @NotBlank
+        @Size(min = 8, max = 100)
+        @Pattern(
+            regexp = STRONG_PASSWORD,
+            message = "deve conter letra maiúscula, letra minúscula e número"
+        )
+        String newPassword
     ) {}
 }

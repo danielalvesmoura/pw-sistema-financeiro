@@ -1,6 +1,7 @@
 package com.ifpr.backend.dto;
 
 import com.ifpr.backend.model.TipoTransacao;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -13,7 +14,7 @@ public final class CategoryDtos {
         @NotBlank @Size(max = 80) String name,
         @NotNull TipoTransacao type,
         @Size(max = 255) String description,
-        @Min(0) Integer displayOrder,
+        @Min(0) @Max(10000) Integer displayOrder,
         Boolean active
     ) {}
 

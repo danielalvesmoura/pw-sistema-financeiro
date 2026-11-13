@@ -2,9 +2,11 @@ package com.ifpr.backend.dto;
 
 import com.ifpr.backend.model.PapelCarteira;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,8 +17,11 @@ public final class WalletDtos {
     public record WalletRequest(
         @NotBlank @Size(max = 100) String name,
         @Size(max = 255) String description,
-        @Size(min = 3, max = 3) String currency,
-        @DecimalMin("0.00") BigDecimal initialBalance
+        @Pattern(regexp = "^[A-Za-z]{3}$", message = "deve possuir 3 letras")
+        String currency,
+        @DecimalMin("0.00")
+        @Digits(integer = 15, fraction = 2)
+        BigDecimal initialBalance
     ) {}
 
     public record WalletResponse(
@@ -33,7 +38,7 @@ public final class WalletDtos {
     ) {}
 
     public record AddMemberRequest(
-        @NotBlank @Email String email, 
+        @NotBlank @Email @Size(max = 254) String email,
         @NotNull PapelCarteira role
     ) {}
 

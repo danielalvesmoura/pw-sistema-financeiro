@@ -2,6 +2,7 @@ package com.ifpr.backend.dto;
 
 import com.ifpr.backend.model.TipoTransacao;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
@@ -14,7 +15,7 @@ public final class TransactionDtos {
 
     public record TransactionRequest(
         @NotNull TipoTransacao type,
-        @NotNull @DecimalMin("0.01") BigDecimal amount,
+        @NotNull @DecimalMin("0.01") @Digits(integer = 15, fraction = 2) BigDecimal amount,
         @Size(max = 255) String description,
         @NotNull @PastOrPresent LocalDate date,
         Long categoryId,
