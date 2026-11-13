@@ -22,19 +22,22 @@ public class CategoryService {
     private final CarteiraRepository carteiraRepository;
     private final CurrentUserService currentUserService;
     private final WalletAuthorizationService auth;
+    private final InputSanitizer inputSanitizer;
 
     public CategoryService(
         CategoriaRepository categoriaRepository,
         TransacaoRepository transacaoRepository,
         CarteiraRepository carteiraRepository,
         CurrentUserService currentUserService,
-        WalletAuthorizationService auth
+        WalletAuthorizationService auth,
+        InputSanitizer inputSanitizer
     ) {
         this.categoriaRepository = categoriaRepository;
         this.transacaoRepository = transacaoRepository;
         this.carteiraRepository = carteiraRepository;
         this.currentUserService = currentUserService;
         this.auth = auth;
+        this.inputSanitizer = inputSanitizer;
     }
 
     @Transactional
@@ -44,11 +47,11 @@ public class CategoryService {
         Usuario currentUser = currentUserService.get();
 
         migrateLegacyCategoriesIfNeeded(walletId, currentUser);
-        
+
         List<Categoria> categorias = type == null
             ? categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(walletId, currentUser.getId())
             : categoriaRepository.findByCarteiraIdAndUsuarioIdAndTipoOrderByOrdemExibicaoAscNomeAsc(walletId, currentUser.getId(), type);
-            
+
         return categorias.stream().map(this::toResponse).toList();
     }
 
@@ -95,19 +98,23 @@ public class CategoryService {
         Long currentUserId = currentUserService.get().getId();
 
         return categoriaRepository.findByIdAndCarteiraIdAndUsuarioId(id, walletId, currentUserId)
-                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
+            .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada."));
     }
 
     private void migrateLegacyCategoriesIfNeeded(Long walletId, Usuario currentUser) {
         if (!categoriaRepository.findByCarteiraIdAndUsuarioIdOrderByOrdemExibicaoAscNomeAsc(
-                walletId, currentUser.getId()).isEmpty()) return;
+            walletId, currentUser.getId()).isEmpty()) {
+            return;
+        }
 
         Carteira wallet = getWallet(walletId);
 
         List<Categoria> legacy = categoriaRepository
-                .findByUsuarioIdAndCarteiraIsNullOrderByOrdemExibicaoAscNomeAsc(currentUser.getId());
+            .findByUsuarioIdAndCarteiraIsNullOrderByOrdemExibicaoAscNomeAsc(currentUser.getId());
 
-        if (legacy.isEmpty()) return;
+        if (legacy.isEmpty()) {
+            return;
+        }
 
         List<Categoria> copies = legacy.stream().map(old -> {
             Categoria copy = new Categoria();
@@ -126,44 +133,35 @@ public class CategoryService {
 
     private Carteira getWallet(Long walletId) {
         return carteiraRepository.findById(walletId)
-                .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
+            .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
     }
 
     private void apply(Categoria categoria, CategoryRequest request, boolean creating) {
-        categoria.setNome(
-            request.name().trim()
-        );
+        categoria.setNome(inputSanitizer.requiredText(request.name(), "Nome da categoria"));
+        categoria.setTipo(request.type());
+        categoria.setDescricao(inputSanitizer.text(request.description()));
 
-        categoria.setTipo(
-            request.type()
-        );
-
-        categoria.setDescricao(
-            blankToNull(request.description())
-        );
-        
-        if (request.displayOrder() != null) 
+        if (request.displayOrder() != null) {
             categoria.setOrdemExibicao(request.displayOrder());
-        else if (creating) 
+        } else if (creating) {
             categoria.setOrdemExibicao(0);
-        if (request.active() != null) 
-            categoria.setAtivo(request.active());
-        else if (creating) 
-            categoria.setAtivo(true);
-    }
+        }
 
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
+        if (request.active() != null) {
+            categoria.setAtivo(request.active());
+        } else if (creating) {
+            categoria.setAtivo(true);
+        }
     }
 
     private CategoryResponse toResponse(Categoria c) {
         return new CategoryResponse(
-            c.getId(), 
+            c.getId(),
             c.getCarteira() == null ? null : c.getCarteira().getId(),
-            c.getNome(), 
-            c.getTipo(), 
-            c.getDescricao(), 
-            c.getOrdemExibicao(), 
+            c.getNome(),
+            c.getTipo(),
+            c.getDescricao(),
+            c.getOrdemExibicao(),
             c.isAtivo()
         );
     }

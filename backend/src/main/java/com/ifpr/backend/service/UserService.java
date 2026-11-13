@@ -15,24 +15,29 @@ public class UserService {
     private final CurrentUserService currentUserService;
     private final UsuarioRepository usuarioRepository;
     private final PasswordEncoder passwordEncoder;
+    private final InputSanitizer inputSanitizer;
 
     public UserService(
         CurrentUserService currentUserService,
         UsuarioRepository usuarioRepository,
-        PasswordEncoder passwordEncoder
+        PasswordEncoder passwordEncoder,
+        InputSanitizer inputSanitizer
     ) {
         this.currentUserService = currentUserService;
         this.usuarioRepository = usuarioRepository;
         this.passwordEncoder = passwordEncoder;
+        this.inputSanitizer = inputSanitizer;
     }
 
-    public UserResponse me() { return toResponse(currentUserService.get()); }
+    public UserResponse me() {
+        return toResponse(currentUserService.get());
+    }
 
     @Transactional
     public UserResponse update(UpdateUserRequest request) {
         Usuario usuario = currentUserService.get();
 
-        usuario.setNome(request.name().trim());
+        usuario.setNome(inputSanitizer.requiredText(request.name(), "Nome"));
 
         if (request.defaultCurrency() != null && !request.defaultCurrency().isBlank()) {
             usuario.setMoedaPadrao(request.defaultCurrency().trim().toUpperCase());
@@ -58,12 +63,12 @@ public class UserService {
 
     private UserResponse toResponse(Usuario usuario) {
         return new UserResponse(
-            usuario.getId(), 
-            usuario.getNome(), 
-            usuario.getEmail(), 
+            usuario.getId(),
+            usuario.getNome(),
+            usuario.getEmail(),
             usuario.getMoedaPadrao(),
-            usuario.getUltimoAcessoEm(), 
-            usuario.getCriadoEm(), 
+            usuario.getUltimoAcessoEm(),
+            usuario.getCriadoEm(),
             usuario.getAtualizadoEm()
         );
     }

@@ -29,6 +29,7 @@ public class TransactionService {
     private final CurrentUserService currentUserService;
     private final WalletAuthorizationService auth;
     private final ApplicationEventPublisher eventPublisher;
+    private final InputSanitizer inputSanitizer;
 
     public TransactionService(
         TransacaoRepository transacaoRepository,
@@ -36,7 +37,8 @@ public class TransactionService {
         CategoriaRepository categoriaRepository,
         CurrentUserService currentUserService,
         WalletAuthorizationService auth,
-        ApplicationEventPublisher eventPublisher
+        ApplicationEventPublisher eventPublisher,
+        InputSanitizer inputSanitizer
     ) {
         this.transacaoRepository = transacaoRepository;
         this.carteiraRepository = carteiraRepository;
@@ -44,6 +46,7 @@ public class TransactionService {
         this.currentUserService = currentUserService;
         this.auth = auth;
         this.eventPublisher = eventPublisher;
+        this.inputSanitizer = inputSanitizer;
     }
 
     @Transactional(readOnly = true)
@@ -199,11 +202,11 @@ public class TransactionService {
     private void apply(Transacao transaction, TransactionRequest request, Long currentUserId) {
         transaction.setTipo(request.type());
         transaction.setValor(request.amount());
-        transaction.setDescricao(blankToNull(request.description()));
+        transaction.setDescricao(inputSanitizer.text(request.description()));
         transaction.setData(request.date());
-        transaction.setAnexoUrl(blankToNull(request.attachmentUrl()));
-        transaction.setObservacoes(blankToNull(request.notes()));
-        transaction.setFormaPagamento(blankToNull(request.paymentMethod()));
+        transaction.setAnexoUrl(inputSanitizer.httpUrl(request.attachmentUrl(), "URL do anexo"));
+        transaction.setObservacoes(inputSanitizer.text(request.notes()));
+        transaction.setFormaPagamento(inputSanitizer.text(request.paymentMethod()));
 
         if (request.categoryId() == null) {
             if (transaction.getCategoria() == null || isCategoryOwnedBy(transaction.getCategoria(), currentUserId)) {
@@ -235,10 +238,6 @@ public class TransactionService {
 
             transaction.setCategoria(category);
         }
-    }
-
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private Transacao findInWallet(Long walletId, Long id) {

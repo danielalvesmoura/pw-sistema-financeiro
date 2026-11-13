@@ -3,10 +3,13 @@ package com.ifpr.backend.controller;
 import static com.ifpr.backend.dto.SummaryDtos.SummaryResponse;
 import static com.ifpr.backend.dto.TransactionDtos.*;
 
+import com.ifpr.backend.exception.BadRequestException;
 import com.ifpr.backend.model.TipoTransacao;
 import com.ifpr.backend.service.TransactionService;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
+import java.util.Map;
+import java.util.Set;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,7 +22,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/wallets/{walletId}")
 public class TransactionController {
+    private static final int MAX_PAGE_SIZE = 100;
+
+    private static final Map<String, String> SORT_FIELDS = Map.of(
+        "date", "data",
+        "amount", "valor",
+        "description", "descricao",
+        "type", "tipo",
+        "createdAt", "criadoEm"
+    );
+
+    private static final Set<String> INTERNAL_SORT_FIELDS = Set.copyOf(SORT_FIELDS.values());
+
     private final TransactionService service;
+
     public TransactionController(TransactionService service) {
         this.service = service;
     }
@@ -37,23 +53,28 @@ public class TransactionController {
     }
 
     private Pageable normalizePageable(Pageable pageable) {
+        int pageSize = Math.min(Math.max(pageable.getPageSize(), 1), MAX_PAGE_SIZE);
+
         Sort mappedSort = Sort.by(pageable.getSort().stream().map(order -> {
-            String property = switch (order.getProperty()) {
-                case "date" -> "data";
-                case "amount" -> "valor";
-                case "description" -> "descricao";
-                case "type" -> "tipo";
-                case "createdAt" -> "criadoEm";
-                default -> order.getProperty();
-            };
+            String requestedProperty = order.getProperty();
+            String property = SORT_FIELDS.getOrDefault(requestedProperty, requestedProperty);
+
+            if (!INTERNAL_SORT_FIELDS.contains(property)) {
+                throw new BadRequestException("Campo de ordenação inválido.");
+            }
+
             return new Sort.Order(order.getDirection(), property);
         }).toList());
-        return PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), mappedSort);
+
+        return PageRequest.of(pageable.getPageNumber(), pageSize, mappedSort);
     }
 
     @PostMapping("/transactions")
     @ResponseStatus(HttpStatus.CREATED)
-    public TransactionResponse create(@PathVariable Long walletId, @Valid @RequestBody TransactionRequest request) {
+    public TransactionResponse create(
+        @PathVariable Long walletId,
+        @Valid @RequestBody TransactionRequest request
+    ) {
         return service.create(walletId, request);
     }
 
@@ -66,12 +87,19 @@ public class TransactionController {
     }
 
     @PutMapping("/transactions/{id}")
-    public TransactionResponse update(@PathVariable Long walletId, @PathVariable Long id, @Valid @RequestBody TransactionRequest request) {
+    public TransactionResponse update(
+        @PathVariable Long walletId,
+        @PathVariable Long id,
+        @Valid @RequestBody TransactionRequest request
+    ) {
         return service.update(walletId, id, request);
     }
 
     @DeleteMapping("/transactions/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long walletId, @PathVariable Long id) {
+    public ResponseEntity<Void> delete(
+        @PathVariable Long walletId,
+        @PathVariable Long id
+    ) {
         service.delete(walletId, id);
         return ResponseEntity.noContent().build();
     }

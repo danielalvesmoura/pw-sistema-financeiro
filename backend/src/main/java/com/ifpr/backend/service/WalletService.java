@@ -21,6 +21,7 @@ public class WalletService {
     private final UsuarioRepository usuarioRepository;
     private final CurrentUserService currentUserService;
     private final WalletAuthorizationService auth;
+    private final InputSanitizer inputSanitizer;
 
     public WalletService(
         CarteiraRepository carteiraRepository,
@@ -29,7 +30,8 @@ public class WalletService {
         CategoriaRepository categoriaRepository,
         UsuarioRepository usuarioRepository,
         CurrentUserService currentUserService,
-        WalletAuthorizationService auth
+        WalletAuthorizationService auth,
+        InputSanitizer inputSanitizer
     ) {
         this.carteiraRepository = carteiraRepository;
         this.membroRepository = membroRepository;
@@ -38,6 +40,7 @@ public class WalletService {
         this.usuarioRepository = usuarioRepository;
         this.currentUserService = currentUserService;
         this.auth = auth;
+        this.inputSanitizer = inputSanitizer;
     }
 
     @Transactional(readOnly = true)
@@ -45,6 +48,7 @@ public class WalletService {
         Usuario user = currentUserService.get();
 
         return membroRepository.findByUsuarioIdOrderByEntradoEmAsc(user.getId()).stream()
+            .filter(member -> !member.isConvitePendente())
             .map(member -> toResponse(member.getCarteira(), member.getPapel()))
             .toList();
     }
@@ -94,7 +98,7 @@ public class WalletService {
         auth.requireOwner(id);
 
         Carteira wallet = carteiraRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
+            .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
 
         transacaoRepository.deleteByCarteiraId(id);
         categoriaRepository.deleteByCarteiraId(id);
@@ -119,15 +123,15 @@ public class WalletService {
             throw new BusinessException("Novo membro deve ser EDITOR ou VIEWER.");
         }
 
-        Usuario user = usuarioRepository.findByEmailIgnoreCase(request.email())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
+        Usuario user = usuarioRepository.findByEmailIgnoreCase(request.email().trim())
+            .orElseThrow(() -> new ResourceNotFoundException("Usuário não encontrado."));
 
         if (membroRepository.existsByCarteiraIdAndUsuarioId(walletId, user.getId())) {
             throw new ConflictException("Usuário já é membro desta carteira.");
         }
 
         Carteira wallet = carteiraRepository.findById(walletId)
-                .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
+            .orElseThrow(() -> new ResourceNotFoundException("Carteira não encontrada."));
 
         CarteiraMembro member = new CarteiraMembro();
 
@@ -144,7 +148,7 @@ public class WalletService {
         auth.requireOwner(walletId);
 
         CarteiraMembro member = membroRepository.findByCarteiraIdAndUsuarioId(walletId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado."));
+            .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado."));
 
         if (member.getPapel() == PapelCarteira.OWNER || request.role() == PapelCarteira.OWNER) {
             throw new BusinessException("O papel do dono da carteira não pode ser alterado.");
@@ -160,7 +164,7 @@ public class WalletService {
         auth.requireOwner(walletId);
 
         CarteiraMembro member = membroRepository.findByCarteiraIdAndUsuarioId(walletId, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado."));
+            .orElseThrow(() -> new ResourceNotFoundException("Membro não encontrado."));
 
         if (member.getPapel() == PapelCarteira.OWNER) {
             throw new BusinessException("O dono não pode ser removido da carteira.");
@@ -170,8 +174,8 @@ public class WalletService {
     }
 
     private void apply(Carteira wallet, WalletRequest request, boolean creating) {
-        wallet.setNome(request.name().trim());
-        wallet.setDescricao(blankToNull(request.description()));
+        wallet.setNome(inputSanitizer.requiredText(request.name(), "Nome da carteira"));
+        wallet.setDescricao(inputSanitizer.text(request.description()));
 
         if (request.currency() != null && !request.currency().isBlank()) {
             wallet.setMoeda(request.currency().trim().toUpperCase());
@@ -184,10 +188,6 @@ public class WalletService {
         } else if (creating) {
             wallet.setSaldoInicial(BigDecimal.ZERO);
         }
-    }
-
-    private String blankToNull(String value) {
-        return value == null || value.isBlank() ? null : value.trim();
     }
 
     private WalletResponse toResponse(Carteira wallet, PapelCarteira role) {
@@ -207,7 +207,7 @@ public class WalletService {
 
     private MemberResponse toMemberResponse(CarteiraMembro member) {
         Usuario user = member.getUsuario();
-        
+
         return new MemberResponse(
             user.getId(),
             user.getNome(),
