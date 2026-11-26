@@ -27,7 +27,9 @@
       }
       h1 { margin-top: 0; font-size: 1.6rem; }
       p { color: #475569; line-height: 1.6; }
-      button {
+      a {
+        display: inline-block;
+        text-decoration: none;
         border: 0;
         border-radius: 10px;
         padding: 12px 18px;
@@ -42,8 +44,8 @@
   <body>
     <main>
       <h1>Você está offline</h1>
-      <p>A conexão com a internet foi perdida. As telas e arquivos já armazenados continuam disponíveis quando possível.</p>
-      <button type="button" onclick="window.location.reload()">Tentar novamente</button>
+      <p>A conexão com a internet foi perdida. Os dados financeiros não ficam armazenados para acesso offline.</p>
+      <a href="/">Tentar novamente</a>
     </main>
   </body>
 </html>

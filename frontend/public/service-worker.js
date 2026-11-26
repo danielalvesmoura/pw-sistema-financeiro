@@ -1,91 +1,33 @@
-const CACHE_VERSION = 'financeiro-pwa-v1';
-const APP_SHELL_CACHE = `${CACHE_VERSION}-app-shell`;
-const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+const CACHE = "financeiro-pwa-v2";
+const PREFIX = "financeiro-pwa-";
+const SHELL = ["/offline.html", "/manifest.json", "/favicon.ico", "/logo192.png", "/logo512.png"];
 
-const APP_SHELL_FILES = [
-  '/',
-  '/index.html',
-  '/offline.html',
-  '/manifest.json',
-  '/favicon.ico',
-  '/logo192.png',
-  '/logo512.png'
-];
-
-self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches
-      .open(APP_SHELL_CACHE)
-      .then((cache) => cache.addAll(APP_SHELL_FILES))
-      .then(() => self.skipWaiting())
-  );
+self.addEventListener("install", event => {
+    event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });
-
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches
-      .keys()
-      .then((keys) =>
-        Promise.all(
-          keys
-            .filter((key) => ![APP_SHELL_CACHE, RUNTIME_CACHE].includes(key))
-            .map((key) => caches.delete(key))
-        )
-      )
-      .then(() => self.clients.claim())
-  );
+self.addEventListener("activate", event => {
+    event.waitUntil(caches.keys().then(keys => Promise.all(keys
+        .filter(key => key.startsWith(PREFIX) && key !== CACHE).map(key => caches.delete(key))))
+        .then(() => self.clients.claim()));
 });
-
-self.addEventListener('fetch', (event) => {
-  const { request } = event;
-
-  if (request.method !== 'GET') {
-    return;
-  }
-
-  const url = new URL(request.url);
-
-  // Dados financeiros nunca são colocados em cache pelo service worker.
-  if (url.pathname.startsWith('/api/')) {
-    return;
-  }
-
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .then((response) => {
-          const copy = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
-          return response;
-        })
-        .catch(async () => {
-          return (
-            (await caches.match(request)) ||
-            (await caches.match('/index.html')) ||
-            caches.match('/offline.html')
-          );
-        })
-    );
-    return;
-  }
-
-  if (url.origin === self.location.origin) {
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          return cachedResponse;
+self.addEventListener("fetch", event => {
+    const request = event.request;
+    const url = new URL(request.url);
+    if (request.method !== "GET" || url.origin !== self.location.origin || request.headers.has("Authorization") ||
+        /^\/(api|auth|actuator|v3|swagger-ui)(\/|$|\.)/.test(url.pathname)) return;
+    if (request.mode === "navigate") {
+        event.respondWith(fetch(request).catch(() => caches.match("/offline.html")));
+        return;
+    }
+    // Somente recursos estáticos conhecidos; nunca dados de API nem HTML autenticado.
+    if (!url.pathname.startsWith("/static/") && !SHELL.includes(url.pathname)) return;
+    event.respondWith(caches.match(request).then(async cached => {
+        if (cached) return cached;
+        const response = await fetch(request);
+        if (response.ok) {
+            const cache = await caches.open(CACHE);
+            await cache.put(request, response.clone());
         }
-
-        return fetch(request).then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200) {
-            return networkResponse;
-          }
-
-          const copy = networkResponse.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
-          return networkResponse;
-        });
-      })
-    );
-  }
+        return response;
+    }));
 });
