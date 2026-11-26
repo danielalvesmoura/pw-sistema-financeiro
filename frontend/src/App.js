@@ -9,6 +9,8 @@ import DashboardPage from "./features/dashboard/pages/DashboardPage";
 import TransactionsPage from "./features/transactions/pages/TransactionsPage";
 import CategoriesPage from "./features/categories/pages/CategoriesPage";
 import WalletsPage from "./features/wallets/pages/WalletsPage";
+import BudgetPage from "./features/budget/pages/BudgetPage";
+import ReportsPage from "./features/reports/pages/ReportsPage";
 import AiInsightsPage from "./features/ai/pages/AiInsightsPage";
 import AppLayout from "./shared/components/AppLayout";
 import ProtectedRoute, { PublicOnlyRoute } from "./shared/components/ProtectedRoute";
@@ -30,6 +32,8 @@ function App() {
             <Route path="transacoes" element={<TransactionsPage />} />
             <Route path="categorias" element={<CategoriesPage />} />
             <Route path="carteiras" element={<WalletsPage />} />
+            <Route path="orcamento" element={<BudgetPage />} />
+            <Route path="relatorios" element={<ReportsPage />} />
             <Route path="insights" element={<AiInsightsPage />} />
             <Route path="perfil/senha" element={<ChangePasswordPage />} />
           </Route>
