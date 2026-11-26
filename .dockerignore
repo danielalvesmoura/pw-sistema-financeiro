@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/target
+frontend/build
+**/.env.local
+**/.env.*.local
+backend/.env
+.env
+**/coverage
+*.zip
