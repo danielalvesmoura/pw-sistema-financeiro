@@ -32,6 +32,9 @@ public class Carteira {
     @Column(precision = 15, scale = 2)
     private BigDecimal saldoInicial = BigDecimal.ZERO;
 
+    @Column(name = "limite_mensal", precision = 15, scale = 2)
+    private BigDecimal limiteMensal;
+
     @Column(nullable = false)
     private LocalDateTime criadoEm;
 
