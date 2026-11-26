@@ -14,12 +14,7 @@ import { transactionService } from "../../../transactions/services/transactions.
 import { realtimeService } from "../../../../services/RealtimeService";
 import { formatDate } from "../../../../shared/utils/date";
 import "./styles.css";
-
-const money = (value, currency = "BRL") =>
-    Number(value || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency,
-    });
+import { formatMoney as money } from "../../../../shared/utils/finance";
 
 export default function DashboardPage() {
     const [wallets, setWallets] = useState([]);

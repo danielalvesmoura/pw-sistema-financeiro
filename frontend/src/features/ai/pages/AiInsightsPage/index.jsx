@@ -2,30 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { walletService } from "../../../../services/WalletService";
 import { aiInsightsService } from "../../services/aiInsights.service";
 import "./styles.css";
-
-const toInputDate = (date) => {
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const day = String(date.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-};
-
-const defaultPeriod = () => {
-    const now = new Date();
-    return {
-        startDate: toInputDate(new Date(now.getFullYear(), now.getMonth(), 1)),
-        endDate: toInputDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
-    };
-};
-
-const money = (value, currency = "BRL") =>
-    Number(value || 0).toLocaleString("pt-BR", {
-        style: "currency",
-        currency,
-    });
+import { currentPeriod, formatMoney as money } from "../../../../shared/utils/finance";
 
 export default function AiInsightsPage() {
-    const initialPeriod = useMemo(defaultPeriod, []);
+    const initialPeriod = useMemo(currentPeriod, []);
     const [wallets, setWallets] = useState([]);
     const [walletId, setWalletId] = useState("");
     const [startDate, setStartDate] = useState(initialPeriod.startDate);
