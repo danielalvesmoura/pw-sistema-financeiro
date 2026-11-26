@@ -8,15 +8,13 @@ const wait = (milliseconds, signal) =>
             return;
         }
 
-        const timeout = setTimeout(resolve, milliseconds);
-        signal.addEventListener(
-            "abort",
-            () => {
-                clearTimeout(timeout);
-                resolve();
-            },
-            { once: true },
-        );
+        const finish = () => {
+            clearTimeout(timeout);
+            signal.removeEventListener("abort", finish);
+            resolve();
+        };
+        const timeout = setTimeout(finish, milliseconds);
+        signal.addEventListener("abort", finish, { once: true });
     });
 
 const dispatchEventBlock = (block, onEvent) => {
@@ -61,6 +59,10 @@ export const realtimeService = {
                         },
                     );
 
+                    if ([401, 403, 404].includes(response.status)) {
+                        onError(new Error(`Conexão em tempo real encerrada (${response.status}).`));
+                        return;
+                    }
                     if (!response.ok || !response.body) {
                         throw new Error(`Falha ao conectar ao tempo real (${response.status}).`);
                     }
