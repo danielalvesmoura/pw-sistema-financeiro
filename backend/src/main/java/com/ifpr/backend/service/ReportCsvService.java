@@ -17,9 +17,9 @@ public class ReportCsvService {
         // BOM ajuda Excel e outros editores a reconhecerem corretamente UTF-8.
         csv.append('\uFEFF');
         row(csv, "Extrato de transações");
-        row(csv, "Carteira", report.walletName());
+        row(csv, "Carteira", safeText(report.walletName()));
         row(csv, "Período", DATE_FORMAT.format(report.startDate()) + " a " + DATE_FORMAT.format(report.endDate()));
-        row(csv, "Moeda", report.currency());
+        row(csv, "Moeda", safeText(report.currency()));
         row(csv, "Receitas", report.totalIncome().toPlainString());
         row(csv, "Despesas", report.totalExpense().toPlainString());
         row(csv, "Resultado do período", report.netResult().toPlainString());
@@ -33,11 +33,11 @@ public class ReportCsvService {
                 csv,
                 DATE_FORMAT.format(item.date()),
                 typeLabel(item.type()),
-                item.categoryName(),
-                item.description(),
+                safeText(item.categoryName()),
+                safeText(item.description()),
                 item.amount().toPlainString(),
-                item.paymentMethod(),
-                item.createdByName()
+                safeText(item.paymentMethod()),
+                safeText(item.createdByName())
             );
         }
 
@@ -58,6 +58,16 @@ public class ReportCsvService {
         }
 
         csv.append('\n');
+    }
+
+    private String safeText(String value) {
+        if (value == null || value.isEmpty()) return value;
+        String trimmed = value.stripLeading();
+        if (value.startsWith("\t") || value.startsWith("\r") || value.startsWith("\n")
+            || (!trimmed.isEmpty() && "=+-@".indexOf(trimmed.charAt(0)) >= 0)) {
+            return "'" + value;
+        }
+        return value;
     }
 
     private String escape(String value) {
