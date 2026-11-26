@@ -6,11 +6,9 @@ import com.ifpr.backend.exception.BadRequestException;
 import com.ifpr.backend.exception.ResourceNotFoundException;
 import com.ifpr.backend.model.Carteira;
 import com.ifpr.backend.model.Categoria;
-import com.ifpr.backend.model.TipoTransacao;
 import com.ifpr.backend.model.Transacao;
 import com.ifpr.backend.repository.CarteiraRepository;
 import com.ifpr.backend.repository.TransacaoRepository;
-import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -50,15 +48,7 @@ public class ReportService {
         List<Transacao> transactions = transacaoRepository
             .findByCarteiraIdAndDataBetweenOrderByDataAscIdAsc(walletId, startDate, endDate);
 
-        BigDecimal income = transactions.stream()
-            .filter(transaction -> transaction.getTipo() == TipoTransacao.INCOME)
-            .map(Transacao::getValor)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal expense = transactions.stream()
-            .filter(transaction -> transaction.getTipo() == TipoTransacao.EXPENSE)
-            .map(Transacao::getValor)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+        FinancialTotals totals = FinancialTotals.from(transactions);
 
         List<TransactionReportItem> items = transactions.stream()
             .map(transaction -> toReportItem(transaction, currentUserId))
@@ -70,9 +60,9 @@ public class ReportService {
             wallet.getMoeda(),
             startDate,
             endDate,
-            income,
-            expense,
-            income.subtract(expense),
+            totals.income(),
+            totals.expense(),
+            totals.net(),
             items.size(),
             items
         );

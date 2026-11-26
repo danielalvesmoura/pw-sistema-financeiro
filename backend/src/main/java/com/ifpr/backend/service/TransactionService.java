@@ -152,11 +152,7 @@ public class TransactionService {
             .filter(t -> endDate == null || !t.getData().isAfter(endDate))
             .toList();
 
-        BigDecimal income = items.stream().filter(t -> t.getTipo() == TipoTransacao.INCOME)
-                .map(Transacao::getValor).reduce(BigDecimal.ZERO, BigDecimal::add);
-
-        BigDecimal expense = items.stream().filter(t -> t.getTipo() == TipoTransacao.EXPENSE)
-                .map(Transacao::getValor).reduce(BigDecimal.ZERO, BigDecimal::add);
+        FinancialTotals totals = FinancialTotals.from(items);
 
         Map<String, CategoryTotalAccumulator> categories = new LinkedHashMap<>();
         Map<YearMonth, MonthAccumulator> months = new TreeMap<>();
@@ -190,9 +186,9 @@ public class TransactionService {
         List<MonthTotal> byMonth = months.entrySet().stream()
                 .map(e -> new MonthTotal(e.getKey().toString(), e.getValue().income, e.getValue().expense)).toList();
 
-        BigDecimal balance = wallet.getSaldoInicial().add(income).subtract(expense);
+        BigDecimal balance = wallet.getSaldoInicial().add(totals.net());
 
-        return new SummaryResponse(income, expense, balance, items.size(), byCategory, byMonth);
+        return new SummaryResponse(totals.income(), totals.expense(), balance, items.size(), byCategory, byMonth);
     }
 
     private void publishChange(WalletRealtimeEvent.Type type, Long walletId, Long transactionId) {
