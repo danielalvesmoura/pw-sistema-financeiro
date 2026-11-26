@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Análise com IA")
 @RestController
 @RequestMapping("/api/v1/wallets/{walletId}/ai")
 public class AiInsightController {
@@ -21,6 +22,7 @@ public class AiInsightController {
         this.aiInsightService = aiInsightService;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Gera análise financeira com Gemini")
     @PostMapping("/insights")
     @ResponseStatus(HttpStatus.OK)
     public InsightResponse generateInsight(

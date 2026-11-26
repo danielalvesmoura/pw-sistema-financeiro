@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Tempo real")
 @RestController
 @RequestMapping("/api/v1/wallets/{walletId}")
 public class RealtimeController {
@@ -17,6 +18,7 @@ public class RealtimeController {
         this.realtimeService = realtimeService;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Abre fluxo SSE autenticado da carteira")
     @GetMapping(value = "/events", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter events(@PathVariable Long walletId) {
         return realtimeService.subscribe(walletId);

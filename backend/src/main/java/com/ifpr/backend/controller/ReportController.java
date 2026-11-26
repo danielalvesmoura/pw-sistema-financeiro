@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+@io.swagger.v3.oas.annotations.tags.Tag(name = "Relatórios")
 @RestController
 @RequestMapping("/api/v1/wallets/{walletId}/reports")
 public class ReportController {
@@ -27,6 +28,7 @@ public class ReportController {
         this.csvService = csvService;
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Consulta extrato de transações por período")
     @GetMapping("/transactions")
     public TransactionReportResponse transactions(
         @PathVariable Long walletId,
@@ -36,6 +38,7 @@ public class ReportController {
         return reportService.transactions(walletId, startDate, endDate);
     }
 
+    @io.swagger.v3.oas.annotations.Operation(summary = "Exporta extrato em CSV")
     @GetMapping(value = "/transactions.csv", produces = "text/csv")
     public ResponseEntity<byte[]> downloadTransactions(
         @PathVariable Long walletId,
