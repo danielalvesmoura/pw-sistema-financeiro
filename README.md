@@ -1,15 +1,15 @@
 # Sistema de Gestão Financeira Compartilhada
 
-Aplicação para controle financeiro pessoal e compartilhado, com **frontend em React** e **API REST em Spring Boot**. O sistema possui autenticação JWT, carteiras compartilhadas, categorias, transações, resumo financeiro e níveis de acesso por membro.
+Aplicação para controle financeiro pessoal e compartilhado, com **frontend em React** e **API REST em Spring Boot**. O sistema possui autenticação JWT, carteiras compartilhadas, categorias, transações, resumo financeiro, atualização em tempo real, relatórios CSV, análise com IA, PWA, orçamento mensal e níveis de acesso por membro.
 
 ## Arquitetura
 
 O backend segue arquitetura em camadas:
 
 ```text
-Controller -> Service -> Repository -> MySQL
-              |
-           Security/JWT
+React -> Controller -> Service -> Repository -> MySQL
+             |           |
+        Security/JWT   DTOs / cálculos / eventos SSE
 ```
 
 Principais pacotes: `controller`, `service`, `repository`, `model`, `dto`, `security`, `exception` e `config`.
@@ -19,7 +19,8 @@ Principais pacotes: `controller`, `service`, `repository`, `model`, `dto`, `secu
 - Java 21+
 - MySQL (pode ser pelo XAMPP)
 - Maven ou Maven Wrapper incluído no projeto
-- Node.js e npm para o frontend
+- Node.js 22 e npm para o frontend
+- Docker e Docker Compose (opcionais, para execução integrada)
 
 ## Banco de dados
 
@@ -44,9 +45,10 @@ As configurações ficam em `backend/src/main/resources/application.properties`.
 | `DB_URL` | URL de conexão com o banco | `jdbc:mysql://localhost:3306/financeiro...` |
 | `DB_USERNAME` | Usuário do banco | `root` |
 | `DB_PASSWORD` | Senha do banco | vazia |
-| `JWT_SECRET` | Chave para assinatura do JWT, com pelo menos 32 caracteres | **sem padrão; obrigatória** |
+| `JWT_SECRET` | Chave para assinatura do JWT, com pelo menos 32 bytes | **sem padrão; obrigatória** |
 | `JWT_EXPIRATION` | Expiração do token em ms | `86400000` (24h) |
 | `APP_CORS_ALLOWED_ORIGINS` | Origens autorizadas, separadas por vírgula | `http://localhost:3000,http://localhost:3001` |
+| `PORT` | Porta HTTP do Spring Boot | `8080` |
 | `EXPOSE_RESET_TOKEN` | Expõe o token de recuperação apenas para teste local | `false` |
 
 
@@ -83,7 +85,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 
-O arquivo `backend/.env.example` serve apenas como referência e não contém credenciais reais. O arquivo `.env` permanece ignorado pelo Git.
+O arquivo `backend/.env.example` serve apenas como referência e não contém credenciais reais. O arquivo `.env` de segredos do backend permanece ignorado pelo Git. O Compose usa um `.env` separado na raiz, também ignorado.
 
 ## Como executar
 
@@ -95,7 +97,7 @@ Inicie o MySQL no XAMPP ou em outra instalação local.
 
 Na pasta `backend`:
 
-mvn spring-boot:run
+Defina `JWT_SECRET` conforme os exemplos acima e execute `mvn spring-boot:run` (ou o Maven Wrapper).
 
 API: `http://localhost:8080`
 
@@ -103,11 +105,21 @@ API: `http://localhost:8080`
 
 Na raiz do projeto:
 
+```bash
 cd frontend
-npm install
+npm ci
 npm start
+```
 
 Frontend: `http://localhost:3000`
+
+## Implantação
+
+**URL pública: pendente de publicação e validação no Render.** Após publicar, substitua esta linha pelo link HTTPS funcional atribuído à aplicação.
+
+O `Dockerfile` empacota o build de produção do React no Spring Boot. A API e o frontend usam a mesma origem no deploy; em desenvolvimento, o frontend usa `REACT_APP_API_BASE_URL=http://localhost:8080`. O `render.yaml` descreve um serviço Docker com health check e variáveis de ambiente; o banco MySQL externo deve ser configurado separadamente.
+
+Para executar tudo localmente, copie `.env.example` da raiz para `.env`, preencha os segredos e execute `docker compose up --build -d`. A aplicação fica em `http://localhost:8080`. Veja [guia completo de implantação](docs/DEPLOY.md).
 
 ## Swagger
 
@@ -116,6 +128,7 @@ Com o backend em execução:
 - Swagger UI: `http://localhost:8080/swagger-ui.html`
 - OpenAPI JSON: `http://localhost:8080/v3/api-docs`
 - Health check: `http://localhost:8080/actuator/health`
+- Use **Authorize** com o JWT nas operações protegidas. Consulte [documentação da API](docs/API.md).
 
 ## Decisões de projeto
 
@@ -168,3 +181,19 @@ Variáveis relacionadas à IA:
 | `GEMINI_MODEL` | Modelo Gemini usado para gerar os insights | `gemini-3.8-flash` |
 
 A API key nunca é enviada ao navegador. O frontend chama apenas o endpoint autenticado do próprio backend: `POST /api/v1/wallets/{walletId}/ai/insights`.
+
+## Orçamento mensal (funcionalidade extra)
+
+Na tela **Orçamento mensal**, selecione a carteira e o mês. O dono pode definir um limite de despesas recorrente, alterá-lo ou removê-lo; membros aceitos consultam o progresso, inclusive VIEWER. O valor fica persistido na carteira e as despesas são somadas diretamente no banco por período. O saldo do orçamento é o limite menos despesas, não o saldo bancário. Quando uma transação muda, a tela consulta novamente os totais via SSE.
+
+## PWA e funcionamento offline
+
+Em produção e HTTPS (ou localhost), o service worker é registrado após carregar a página. O manifesto permite instalar a aplicação. O cache armazena apenas recursos estáticos e a tela offline; respostas de autenticação, SSE e API não são cacheadas. Sem conexão, a navegação exibe uma página de aviso, não um saldo desatualizado. Em desenvolvimento com `npm start`, o service worker não é registrado.
+
+## Qualidade e testes
+
+O dashboard e os relatórios reutilizam os mesmos totais monetários. O backend separa cálculos monetários em `FinancialTotals` e `BudgetProgress`; os DTOs e a autorização de carteira são reutilizados. As somas utilizam BigDecimal. O frontend centraliza formatação monetária e períodos de datas em utilitários compartilhados. Execute `mvn test` em `backend` e `npm test -- --watchAll=false --runInBand` em `frontend`. O GitHub Actions verifica os testes e o build do React. Consulte [roteiro de validação](docs/VALIDACAO.md).
+
+## Limitações operacionais
+
+O fluxo de recuperação de senha existente não envia e-mail por SMTP; a exposição de token é exclusiva de desenvolvimento. O rate limiting e SSE são locais à instância. Para produção, configure MySQL persistente, HTTPS, backup do banco e segredos da plataforma. Não foi realizada publicação pública nesta versão dos arquivos.

@@ -1,0 +1,6 @@
+.reports-page, .report-result { display: grid; gap: 1.4rem; }
+.report-dates, .report-totals { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.report-totals { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.report-totals strong { display: block; margin-top: .5rem; font-size: 1.8rem; }
+.report-table { overflow-x: auto; }
+@media (max-width: 600px) { .report-dates, .report-totals { grid-template-columns: 1fr; } }
