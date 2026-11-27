@@ -1,7 +1,7 @@
 FROM node:22-bookworm-slim AS frontend
 WORKDIR /app
 COPY frontend/package.json frontend/package-lock.json ./
-RUN npm ci --no-audit --no-fund
+RUN npm install --no-audit --no-fund
 COPY frontend/ ./
 ENV REACT_APP_API_BASE_URL=/ INLINE_RUNTIME_CHUNK=false
 RUN npm run build
