@@ -4,6 +4,48 @@ import { aiInsightsService } from "../../services/aiInsights.service";
 import "./styles.css";
 import { currentPeriod, formatMoney as money } from "../../../../shared/utils/finance";
 
+// Renderiza apenas a formatação textual usada nas análises, sem interpretar HTML.
+function formatInline(text) {
+    return text.split(/(\*\*[^*]+\*\*|__[^_]+__)/g).map((part, index) =>
+        index % 2 === 1
+            ? <strong key={index}>{part.slice(2, -2)}</strong>
+            : part
+    );
+}
+
+function InsightText({ text }) {
+    const blocks = [];
+    for (const rawLine of (text || "").split(/\r?\n/)) {
+        const line = rawLine.trim();
+        if (!line) continue;
+
+        // Aceita também os títulos Markdown das respostas anteriores.
+        const title = line.replace(/^#{1,6}\s+/, "").replace(/\*\*|__/g, "");
+        if (/^(?:[123][.)]\s*)?(Diagnóstico|Pontos de atenção|Ações práticas)\s*:?$/i.test(title)) {
+            blocks.push({ type: "heading", text: title.replace(/:$/, "") });
+        } else if (/^[-*•]\s+/.test(line)) {
+            const item = line.replace(/^[-*•]\s+/, "");
+            const last = blocks[blocks.length - 1];
+            if (last?.type === "list") last.items.push(item);
+            else blocks.push({ type: "list", items: [item] });
+        } else {
+            blocks.push({ type: "paragraph", text: line });
+        }
+    }
+
+    return <div className="ai-insight-text">
+        {blocks.map((block, index) => {
+            if (block.type === "heading") return <h3 key={index}>{block.text}</h3>;
+            if (block.type === "list") return (
+                <ul key={index}>
+                    {block.items.map((item, i) => <li key={i}>{formatInline(item)}</li>)}
+                </ul>
+            );
+            return <p key={index}>{formatInline(block.text)}</p>;
+        })}
+    </div>;
+}
+
 export default function AiInsightsPage() {
     const initialPeriod = useMemo(currentPeriod, []);
     const [wallets, setWallets] = useState([]);
@@ -174,7 +216,7 @@ export default function AiInsightsPage() {
                             <span className="ai-badge">IA</span>
                         </div>
 
-                        <div className="ai-insight-text">{result.insight}</div>
+                        <InsightText text={result.insight} />
 
                         <p className="ai-disclaimer">
                             A análise é educativa e pode conter imprecisões. Confira os dados antes de tomar decisões financeiras.

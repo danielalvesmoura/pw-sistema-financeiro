@@ -114,9 +114,33 @@
 .ai-insight-text {
     font-size: 1.6rem;
     overflow-wrap: anywhere;
-    white-space: pre-wrap;
     line-height: 1.65;
     color: #243238;
+}
+
+.ai-insight-text h3 {
+    margin: 1.6rem 0 .6rem;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #003345;
+}
+
+.ai-insight-text h3:first-child {
+    margin-top: 0;
+}
+
+.ai-insight-text p {
+    margin: 0 0 .8rem;
+}
+
+.ai-insight-text ul {
+    margin: .4rem 0 .8rem;
+    padding-left: 2.4rem;
+    list-style: disc;
+}
+
+.ai-insight-text li {
+    margin: .4rem 0;
 }
 
 .ai-disclaimer {

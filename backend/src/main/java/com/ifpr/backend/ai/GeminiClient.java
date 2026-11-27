@@ -31,32 +31,13 @@ public class GeminiClient {
     public String generate(String prompt) {
         ensureConfigured();
 
-        Map<String, Object> payload = Map.of(
-            "contents", List.of(Map.of(
-                "role", "user",
-                "parts", List.of(Map.of("text", prompt))
-            )),
-            "generationConfig", Map.of(
-                "temperature", 0.3,
-                "maxOutputTokens", 700
-            )
-        );
-
         try {
-            JsonNode response = restClient.post()
-                .uri("/v1beta/models/{model}:generateContent", model)
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("x-goog-api-key", apiKey)
-                .body(payload)
-                .retrieve()
-                .body(JsonNode.class);
-
-            String text = extractText(response);
-            if (text.isBlank()) {
-                throw new BusinessException("A IA não retornou uma análise. Tente novamente.");
+            JsonNode candidate = requestCandidate(prompt, 4096);
+            if ("MAX_TOKENS".equals(finishReason(candidate))) {
+                // Uma única nova tentativa com mais espaço para o raciocínio e a resposta.
+                candidate = requestCandidate(prompt, 8192);
             }
-
-            return text;
+            return extractCompleteText(candidate);
         } catch (RestClientResponseException ex) {
             if (ex.getStatusCode().value() == 429) {
                 throw new BusinessException("O limite de uso da IA foi atingido. Tente novamente mais tarde.");
@@ -82,26 +63,55 @@ public class GeminiClient {
         }
     }
 
-    private String extractText(JsonNode response) {
-        if (response == null) {
-            return "";
+    private JsonNode requestCandidate(String prompt, int maxOutputTokens) {
+        Map<String, Object> payload = Map.of(
+            "contents", List.of(Map.of(
+                "role", "user",
+                "parts", List.of(Map.of("text", prompt))
+            )),
+            "generationConfig", Map.of(
+                "temperature", 0.3,
+                "maxOutputTokens", maxOutputTokens
+            )
+        );
+
+        JsonNode response = restClient.post()
+            .uri("/v1beta/models/{model}:generateContent", model)
+            .contentType(MediaType.APPLICATION_JSON)
+            .header("x-goog-api-key", apiKey)
+            .body(payload)
+            .retrieve()
+            .body(JsonNode.class);
+
+        return response == null ? null : response.path("candidates").path(0);
+    }
+
+    private static String finishReason(JsonNode candidate) {
+        return candidate == null ? "" : candidate.path("finishReason").asText("");
+    }
+
+    static String extractCompleteText(JsonNode candidate) {
+        String reason = finishReason(candidate);
+        if ("MAX_TOKENS".equals(reason)) {
+            throw new BusinessException("A IA atingiu o limite de geração. Tente novamente para obter uma análise completa.");
+        }
+        if (!"STOP".equals(reason)) {
+            throw new BusinessException("A IA não concluiu a análise. Tente novamente.");
         }
 
-        JsonNode parts = response.path("candidates").path(0).path("content").path("parts");
-        if (!parts.isArray()) {
-            return "";
-        }
-
+        JsonNode parts = candidate.path("content").path("parts");
         StringBuilder result = new StringBuilder();
-        for (JsonNode part : parts) {
-            String text = part.path("text").asText("").trim();
-            if (!text.isBlank()) {
-                if (!result.isEmpty()) {
-                    result.append("\n");
+        if (parts.isArray()) {
+            for (JsonNode part : parts) {
+                if (!part.path("thought").asBoolean(false)) {
+                    result.append(part.path("text").asText(""));
                 }
-                result.append(text);
             }
         }
-        return result.toString().trim();
+        String text = result.toString().trim();
+        if (text.isBlank()) {
+            throw new BusinessException("A IA não retornou uma análise. Tente novamente.");
+        }
+        return text;
     }
 }

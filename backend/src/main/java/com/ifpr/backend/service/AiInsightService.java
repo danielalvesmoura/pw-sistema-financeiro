@@ -67,12 +67,14 @@ public class AiInsightService {
             - Maiores categorias de despesa:
             %s
 
-            Gere uma análise curta com exatamente estas três seções:
+            Gere uma análise completa e concisa, com cerca de 150 a 200 palavras e exatamente estas três seções. Use os títulos abaixo em linhas próprias, sem asteriscos, hashtags ou outras marcações Markdown:
             1. Diagnóstico
             2. Pontos de atenção
             3. Ações práticas
 
-            Em "Ações práticas", sugira no máximo três ações simples baseadas somente nos dados apresentados.
+            Escreva um parágrafo curto em cada uma das duas primeiras seções.
+            Em "Ações práticas", sugira no máximo três ações simples baseadas somente nos dados apresentados, uma por linha iniciada por hífen.
+            Conclua todas as seções e frases antes de encerrar a resposta.
             """.formatted(
                 context.walletName(),
                 context.startDate(),
