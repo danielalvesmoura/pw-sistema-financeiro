@@ -19,9 +19,9 @@
 
 .ai-filter-card label {
     display: grid;
-    gap: .45rem;
+    gap: .6rem;
     color: #40484c;
-    font-size: .9rem;
+    font-size: 1.4rem;
     font-weight: 600;
 }
 
@@ -31,7 +31,9 @@
     border: 1px solid #c8d0d4;
     border-radius: .65rem;
     background: #ffffff;
-    padding: .8rem .9rem;
+    padding: 1rem 1.2rem;
+    min-height: 44px;
+    font-size: 1.6rem;
     color: #243238;
 }
 
@@ -41,6 +43,7 @@
     padding: .85rem 1.1rem;
     background: #003345;
     color: #ffffff;
+    font-size: 1.6rem;
     font-weight: 700;
     cursor: pointer;
     min-height: 44px;
@@ -64,17 +67,17 @@
 
 .ai-metric {
     display: grid;
-    gap: .45rem;
+    gap: .6rem;
 }
 
 .ai-metric span {
     color: #6a777e;
-    font-size: .9rem;
+    font-size: 1.4rem;
 }
 
 .ai-metric strong {
     color: #003345;
-    font-size: 1.25rem;
+    font-size: 2rem;
 }
 
 .ai-insight-card {
@@ -95,6 +98,7 @@
 }
 
 .ai-insight-title small {
+    font-size: 1.4rem;
     color: #6a777e;
 }
 
@@ -102,12 +106,14 @@
     border-radius: 999px;
     background: #e7eef0;
     color: #003345;
-    padding: .35rem .65rem;
-    font-size: .75rem;
+    padding: .5rem .8rem;
+    font-size: 1.2rem;
     font-weight: 800;
 }
 
 .ai-insight-text {
+    font-size: 1.6rem;
+    overflow-wrap: anywhere;
     white-space: pre-wrap;
     line-height: 1.65;
     color: #243238;
@@ -118,7 +124,7 @@
     padding-top: 1rem;
     border-top: 1px solid #e3e7e9;
     color: #6a777e;
-    font-size: .85rem;
+    font-size: 1.3rem;
 }
 
 @media (max-width: 980px) {
