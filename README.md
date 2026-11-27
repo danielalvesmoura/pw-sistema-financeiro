@@ -2,6 +2,22 @@
 
 Aplicação para controle financeiro pessoal e compartilhado, com **frontend em React** e **API REST em Spring Boot**. O sistema possui autenticação JWT, carteiras compartilhadas, categorias, transações, resumo financeiro, atualização em tempo real, relatórios CSV, análise com IA, PWA, orçamento mensal e níveis de acesso por membro.
 
+## Implantação
+
+O sistema está disponível publicamente nos seguintes endereços:
+
+- Frontend: https://sistema-financeiro-tau-jade.vercel.app
+- Backend: https://financeiro-backend-584e.onrender.com
+- Swagger: https://financeiro-backend-584e.onrender.com/swagger-ui.html
+
+### Infraestrutura
+
+- Frontend React hospedado no Vercel.
+- Backend Spring Boot hospedado no Render com Docker.
+- Banco de dados TiDB Cloud compatível com MySQL.
+- Integração com a API Google Gemini.
+- Comunicação em tempo real via Server-Sent Events.
+
 ## Arquitetura
 
 O backend segue arquitetura em camadas:
@@ -112,23 +128,6 @@ npm start
 ```
 
 Frontend: `http://localhost:3000`
-
-## Implantação
-
-**URL pública: pendente de publicação e validação no Render.** Após publicar, substitua esta linha pelo link HTTPS funcional atribuído à aplicação.
-
-O `Dockerfile` empacota o build de produção do React no Spring Boot. A API e o frontend usam a mesma origem no deploy; em desenvolvimento, o frontend usa `REACT_APP_API_BASE_URL=http://localhost:8080`. O `render.yaml` descreve um serviço Docker com health check e variáveis de ambiente; o banco MySQL externo deve ser configurado separadamente.
-
-Para executar tudo localmente, copie `.env.example` da raiz para `.env`, preencha os segredos e execute `docker compose up --build -d`. A aplicação fica em `http://localhost:8080`. Veja [guia completo de implantação](docs/DEPLOY.md).
-
-## Swagger
-
-Com o backend em execução:
-
-- Swagger UI: `http://localhost:8080/swagger-ui.html`
-- OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-- Health check: `http://localhost:8080/actuator/health`
-- Use **Authorize** com o JWT nas operações protegidas. Consulte [documentação da API](docs/API.md).
 
 ## Decisões de projeto
 
